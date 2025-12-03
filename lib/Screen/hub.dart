@@ -1,3 +1,4 @@
+import 'package:chatapp/Screen/newfeed.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../provider/notification_provider.dart';
@@ -27,6 +28,7 @@ class _HubState extends State<Hub> {
       MessList(userId: widget.userId),
       Contact(userId: widget.userId),
       Profile(userId: widget.userId),
+      Newfeed(userId: widget.userId),
     ];
   }
 
@@ -85,7 +87,7 @@ class _HubState extends State<Hub> {
         title: Text(_state),
         backgroundColor: const Color.fromARGB(255, 27, 92, 203),
         actions: [
-          if (_index != 2)
+          if (_index != 2&&_index!=3)
             Row(
               children: [
                 IconButton(
@@ -154,6 +156,8 @@ class _HubState extends State<Hub> {
             _buildBottomIcon(Icons.people, "Friends", 1),
             const SizedBox(width: 30),
             _buildBottomIcon(Icons.person, "Profile", 2),
+            const SizedBox(width: 30),
+            _buildBottomIcon(Icons.newspaper, "News Feed", 3),
           ],
         ),
       ),
