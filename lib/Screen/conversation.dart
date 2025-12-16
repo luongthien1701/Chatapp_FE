@@ -1,15 +1,14 @@
+import 'package:chatapp/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:chatapp/model/message.dart';
 import 'package:chatapp/provider/convervasion_provider.dart';
 
 class Conversation extends StatefulWidget {
-  final int userId;
   final int convervationid;
 
   const Conversation({
     super.key,
-    required this.userId,
     required this.convervationid,
   });
 
@@ -20,23 +19,24 @@ class Conversation extends StatefulWidget {
 class _ConversationState extends State<Conversation> {
   final TextEditingController messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  late ConversationProvider provider; // ✅ giữ provider cục bộ
-
+  late final ConversationProvider provider;
+  late final int userId;
   @override
   void initState() {
     super.initState();
-    provider = Provider.of<ConversationProvider>(context, listen: false);
+    final provider = context.read<ConversationProvider>();
+    final userId=context.read<UserProvider>().userId;
     provider.loadRoomInfo(widget.convervationid);
-    provider.loadMessages(widget.userId, widget.convervationid).then((_) {
+    provider.loadMessages(userId, widget.convervationid).then((_) {
       _scrollToBottom();
     });
-    provider.joinRoom(widget.userId, widget.convervationid);
-    provider.listenMessages(widget.userId);
+    provider.joinRoom(userId, widget.convervationid);
+    provider.listenMessages(userId);
   }
 
   @override
   void dispose() {
-    provider.leaveRoom(widget.userId, widget.convervationid); 
+    provider.leaveRoom(userId, widget.convervationid); 
     super.dispose();
   }
 
@@ -150,7 +150,7 @@ class _ConversationState extends State<Conversation> {
                       if (messageController.text.trim().isEmpty) return;
                       final msg = MessageSend(
                         chatRoomId: widget.convervationid,
-                        senderId: widget.userId,
+                        senderId: userId,
                         content: messageController.text,
                         fileUrl: null,
                       );

@@ -4,15 +4,15 @@ import 'package:chatapp/Service/socket_service.dart';
 import 'package:chatapp/model/notification.dart';
 import 'package:chatapp/model/message.dart';
 import 'package:chatapp/provider/account_provider.dart';
+import 'package:chatapp/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 
 class Account extends StatefulWidget {
-  final int userId;
   final int friendId;
-  const Account({super.key, required this.userId, required this.friendId});
+  const Account({super.key, required this.friendId});
 
   @override
   State<Account> createState() => _AccountState();
@@ -32,13 +32,14 @@ class _AccountState extends State<Account> {
   bool check = false;
   bool changepassword = false;
   bool _initialized = false;
-
+  late final int userId;
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_initialized) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.read<AccountProvider>().loadProfile(widget.userId, widget.friendId);
+        userId=context.read<UserProvider>().userId;
+        context.read<AccountProvider>().loadProfile(userId, widget.friendId);
       });
       _initialized = true;
     }
@@ -99,7 +100,7 @@ class _AccountState extends State<Account> {
                           visible: provider.status == "ACCEPTED",
                           child: GestureDetector(
                             onTap: () {
-                              provider.deleteFriend(widget.userId, widget.friendId);
+                              provider.deleteFriend(userId, widget.friendId);
                             },
                             child: SizedBox(
                               width: 150,
@@ -282,10 +283,10 @@ class _AccountState extends State<Account> {
             if (provider.status == "NONE")
               ElevatedButton(
                 onPressed: () {
-                  provider.addFriend(widget.userId, widget.friendId);
+                  provider.addFriend(userId, widget.friendId);
                   final notification = NotiDTO(
                     title: "đã gửi lời mời kết bạn",
-                    senderId: SenderInfo(id: widget.userId, name: provider.displayname, avatarUrl: ""),
+                    senderId: SenderInfo(id: userId, name: provider.displayname, avatarUrl: ""),
                     receiverId: widget.friendId,
                     status: false,
                     createdAt: DateTime.now().millisecondsSinceEpoch,
@@ -298,20 +299,20 @@ class _AccountState extends State<Account> {
               ),
             if (provider.status == "PENDING")
               ElevatedButton(
-                onPressed: () => provider.deleteFriend(widget.userId, widget.friendId),
+                onPressed: () => provider.deleteFriend(userId, widget.friendId),
                 child: const Text("Đã gửi lời mời"),
               ),
             if (provider.status == "RECEIVED")
               ElevatedButton(
-                onPressed: () => provider.acceptFriend(widget.userId, widget.friendId),
+                onPressed: () => provider.acceptFriend(userId, widget.friendId),
                 child: const Text("Chấp nhận"),
               ),
             const SizedBox(width: 10),
             ElevatedButton(
               onPressed: () async {
-                final id = await provider.findRoom(widget.userId, widget.friendId);
+                final id = await provider.findRoom(userId, widget.friendId);
                 if (!mounted) return;
-                Navigator.push(context, MaterialPageRoute(builder: (context) => Conversation(userId: widget.userId, convervationid: id)));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => Conversation(convervationid: id)));
               },
               child: const Text("Gửi tin nhắn"),
             ),

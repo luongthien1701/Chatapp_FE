@@ -1,4 +1,5 @@
 import 'package:chatapp/Screen/hub.dart';
+import 'package:chatapp/model/message.dart';
 import 'package:chatapp/model/userrequest.dart';
 import 'package:chatapp/provider/user_provider.dart';
 import 'package:chatapp/provider/notification_provider.dart';
@@ -102,11 +103,10 @@ class _LoginPageState extends State<LoginPage> {
                     }
                     try{
                     Loginrequest userlogin=Loginrequest(username: username.text, password: password.text);
-                    int userId= await auth.login(userlogin);
-                    provider.setUserId(userId);
-                    await context.read<NotificationProvider>().init(userId);
+                    SenderInfo user= await auth.login(userlogin);
+                    provider.setUser(user.id, user.name, user.avatarUrl ?? '');
                     if (!mounted) return;
-                    Navigator.push(currentcontext, MaterialPageRoute(builder: (context)=> Hub(userId: userId)));
+                    Navigator.push(currentcontext, MaterialPageRoute(builder: (context)=> Hub()));
                     }
                     catch(e)
                     {

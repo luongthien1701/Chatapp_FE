@@ -1,12 +1,13 @@
 import 'package:chatapp/Screen/account.dart';
+import 'package:provider/provider.dart';
 import 'package:chatapp/Screen/login.dart';
 import 'package:chatapp/Service/profile_service.dart';
 import 'package:chatapp/model/userdto.dart';
+import 'package:chatapp/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 
 class Profile extends StatefulWidget {
-  final int userId;
-  const Profile({super.key,required this.userId});
+  const Profile({super.key});
 
   @override
   State<Profile> createState() => _Profile();
@@ -14,18 +15,20 @@ class Profile extends StatefulWidget {
 
 class _Profile extends State<Profile> {
   String name="";
-  int _userId=0;
   ProfileService profileService =ProfileService();
+  late final int _userId;
   @override
   void initState()
   {
     super.initState();
-    _userId=widget.userId;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+    _userId=context.read<UserProvider>().userId;
     loaddata();
+    });
   }
   void loaddata() async
   {
-    UserDTO user=await profileService.getProfile(widget.userId);
+    UserDTO user=await profileService.getProfile(_userId);
     name=user.displayName;
   }
   @override
@@ -53,7 +56,7 @@ class _Profile extends State<Profile> {
                 SizedBox(height: 50,),
                 GestureDetector(
                   onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => Account(userId: _userId, friendId: 0)));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => Account(friendId: 0)));
                   },
                   child: Row(
                     children: [

@@ -1,12 +1,12 @@
 import 'package:chatapp/Screen/account.dart';
 import 'package:chatapp/provider/search_provider.dart';
+import 'package:chatapp/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../model/search.dart';
 
 class Check extends StatefulWidget {
-  final int userId;
-  const Check({super.key, required this.userId});
+  const Check({super.key, });
 
   @override
   State<Check> createState() => _Check();
@@ -19,8 +19,9 @@ class _Check extends State<Check> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<SearchProvider>();
+    final userId=context.read<UserProvider>().userId;
     final pages = <Widget>[
-      _ContactPage(userId: widget.userId, userlist: provider.userlist),
+      _ContactPage(userId: userId, userlist: provider.userlist),
       _MessagePage(messlist: provider.messlist),
       _RoomPage(roomlist: provider.roomlist),
     ];
@@ -36,7 +37,7 @@ class _Check extends State<Check> {
             hintText: "Nhập dữ liệu",
           ),
           onChanged: (value) {
-            context.read<SearchProvider>().loaddata(widget.userId, like.text);
+            context.read<SearchProvider>().loaddata(userId, like.text);
           },
         ),
         actions: const [Icon(Icons.search)],
@@ -113,7 +114,7 @@ class _ContactPage extends StatelessWidget {
           final user = userlist[index];
           return ListTile(
             onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context)=> Account(userId: userId, friendId: user.id??0)));
+              Navigator.push(context, MaterialPageRoute(builder: (context)=> Account(friendId: user.id??0)));
             },
             leading: CircleAvatar(
               backgroundImage: (user.avatarUrl != null && user.avatarUrl!.isNotEmpty)

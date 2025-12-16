@@ -1,11 +1,11 @@
+import 'package:chatapp/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../provider/mess_list_provider.dart';
 import 'conversation.dart';
 
 class MessList extends StatefulWidget {
-  final int userId;
-  const MessList({super.key, required this.userId});
+  const MessList({super.key});
 
   @override
   State<MessList> createState() => _MessList();
@@ -15,9 +15,12 @@ class _MessList extends State<MessList> {
   @override
   void initState() {
     super.initState();
-    final provider = Provider.of<ChatroomProvider>(context, listen: false);
-    provider.fetchChatrooms(widget.userId);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+    final provider = context.read<ChatroomProvider>();
+    final userId=context.read<UserProvider>().userId;
+    provider.fetchChatrooms(userId);
     provider.startListening();
+    });
   }
 
   @override
@@ -53,7 +56,6 @@ class _MessList extends State<MessList> {
                     context,
                     MaterialPageRoute(
                       builder: (_) => Conversation(
-                        userId: widget.userId,
                         convervationid: room.id,
                       ),
                     ),

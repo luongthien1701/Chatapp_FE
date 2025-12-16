@@ -18,6 +18,13 @@ class SenderInfo {
       avatarUrl: json['avatarUrl'],
     );
   }
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'avatarUrl': avatarUrl,
+    };
+  }
 }
 
 class MessageDTO {

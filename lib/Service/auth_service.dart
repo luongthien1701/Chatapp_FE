@@ -1,9 +1,10 @@
 import 'dart:convert';
+import 'package:chatapp/model/message.dart';
 import 'package:chatapp/model/userrequest.dart';
 import 'package:http/http.dart' as http;
 class AuthService {
   final String baseUrl='http://192.168.200.1:8080/api';
-  Future<int> login(Loginrequest userlogin) async
+  Future<SenderInfo> login(Loginrequest userlogin) async
   {
     final url=Uri.parse('$baseUrl/user/login');
     final respon=await http.post(
@@ -14,7 +15,7 @@ class AuthService {
     if (respon.statusCode==200)
     {
       final data=jsonDecode(utf8.decode(respon.bodyBytes));
-      return data as int;
+      return SenderInfo.fromJson(data);
     }
     else 
     {

@@ -1,4 +1,5 @@
 import 'package:chatapp/Screen/newfeed.dart';
+import 'package:chatapp/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../provider/notification_provider.dart';
@@ -9,8 +10,7 @@ import '../Screen/profile.dart';
 import '../Screen/search.dart';
 
 class Hub extends StatefulWidget {
-  final int userId;
-  const Hub({super.key, required this.userId});
+  const Hub({super.key});
 
   @override
   State<Hub> createState() => _HubState();
@@ -18,6 +18,7 @@ class Hub extends StatefulWidget {
 
 class _HubState extends State<Hub> {
   int _index = 0;
+  
   String _state = "Messages";
   late List<Widget> _pages;
 
@@ -25,10 +26,10 @@ class _HubState extends State<Hub> {
   void initState() {
     super.initState();
     _pages = [
-      MessList(userId: widget.userId),
-      Contact(userId: widget.userId),
-      Profile(userId: widget.userId),
-      Newfeed(userId: widget.userId),
+      MessList(),
+      Contact(),
+      Profile(),
+      Newfeed(),
     ];
   }
 
@@ -62,7 +63,6 @@ class _HubState extends State<Hub> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => Account(
-                                userId: widget.userId,
                                 friendId: n.senderId.id,
                               ),
                             ),
@@ -87,7 +87,7 @@ class _HubState extends State<Hub> {
         title: Text(_state),
         backgroundColor: const Color.fromARGB(255, 27, 92, 203),
         actions: [
-          if (_index != 2&&_index!=3)
+          if (_index != 2 && _index != 3)
             Row(
               children: [
                 IconButton(
@@ -95,7 +95,7 @@ class _HubState extends State<Hub> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => Check(userId: widget.userId),
+                        builder: (context) => Check(),
                       ),
                     );
                   },
@@ -129,61 +129,43 @@ class _HubState extends State<Hub> {
             ),
         ],
       ),
-      body: Container(
-        decoration: const BoxDecoration(
-          color: Color.fromARGB(255, 96, 137, 208),
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(30),
-            topRight: Radius.circular(30),
-          ),
-        ),
-        child: IndexedStack(index: _index, children: _pages),
-      ),
-      bottomNavigationBar: Container(
-        height: 70,
-        decoration: const BoxDecoration(
-          color: Color.fromARGB(255, 27, 123, 202),
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(30),
-            topRight: Radius.circular(30),
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildBottomIcon(Icons.message, "Messages", 0),
-            const SizedBox(width: 30),
-            _buildBottomIcon(Icons.people, "Friends", 1),
-            const SizedBox(width: 30),
-            _buildBottomIcon(Icons.person, "Profile", 2),
-            const SizedBox(width: 30),
-            _buildBottomIcon(Icons.newspaper, "News Feed", 3),
-          ],
-        ),
-      ),
-    );
-  }
 
-  Widget _buildBottomIcon(IconData icon, String label, int index) {
-    final bool isSelected = _index == index;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconButton(
-          style: IconButton.styleFrom(
-            backgroundColor:
-                isSelected ? Colors.blueAccent : Colors.transparent,
+      body: IndexedStack(index: _index, children: _pages),
+
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _index,
+        height: 70,
+        backgroundColor: const Color.fromARGB(255, 27, 123, 202),
+        indicatorColor: Colors.white.withOpacity(0.3),
+        onDestinationSelected: (i) {
+          setState(() {
+            _index = i;
+            _state = ["Messages", "Friends", "Profile", "News Feed"][i];
+          });
+        },
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.message_outlined),
+            selectedIcon: Icon(Icons.message, color: Colors.white),
+            label: "Messages",
           ),
-          onPressed: () {
-            setState(() {
-              _index = index;
-              _state = label;
-            });
-          },
-          icon: Icon(icon, color: Colors.white),
-        ),
-        Text(label, style: const TextStyle(color: Colors.white, fontSize: 12)),
-      ],
+          NavigationDestination(
+            icon: Icon(Icons.people_outline),
+            selectedIcon: Icon(Icons.people, color: Colors.white),
+            label: "Friends",
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person, color: Colors.white),
+            label: "Profile",
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.newspaper_outlined),
+            selectedIcon: Icon(Icons.newspaper, color: Colors.white),
+            label: "News Feed",
+          ),
+        ],
+      ),
     );
   }
 }
