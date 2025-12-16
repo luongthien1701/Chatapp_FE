@@ -1,8 +1,9 @@
 import 'dart:convert';
+import 'package:chatapp/Service/ip.dart';
 import 'package:chatapp/model/friend.dart';
 import 'package:http/http.dart' as http;
 class FriendService {
-  final String baseUrl='http://192.168.200.1:8080/api';
+  String baseUrl = Ip().getIp();
   Future<List<FriendDTO>> getChatrooms(int userId) async
   {
     final url=Uri.parse('$baseUrl/friend/$userId');

@@ -1,8 +1,9 @@
 import 'dart:convert';
+import 'package:chatapp/Service/ip.dart';
 import 'package:chatapp/model/search.dart';
 import 'package:http/http.dart' as http;
 class SearchService {
-  final String baseUrl='http://192.168.200.1:8080/api';
+  String baseUrl = Ip().getIp();
   Future<List<SearchDTO>> getMessages(int userId,String like) async
   {
     final url=Uri.parse('$baseUrl/search/$userId/$like');

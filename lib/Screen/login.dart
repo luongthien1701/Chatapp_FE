@@ -2,7 +2,6 @@ import 'package:chatapp/Screen/hub.dart';
 import 'package:chatapp/model/message.dart';
 import 'package:chatapp/model/userrequest.dart';
 import 'package:chatapp/provider/user_provider.dart';
-import 'package:chatapp/provider/notification_provider.dart';
 import 'package:flutter/material.dart';
 import 'signup.dart';
 import 'package:provider/provider.dart';

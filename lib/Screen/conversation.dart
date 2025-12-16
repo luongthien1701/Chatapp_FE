@@ -24,8 +24,8 @@ class _ConversationState extends State<Conversation> {
   @override
   void initState() {
     super.initState();
-    final provider = context.read<ConversationProvider>();
-    final userId=context.read<UserProvider>().userId;
+    provider = context.read<ConversationProvider>();
+    userId=context.read<UserProvider>().userId;
     provider.loadRoomInfo(widget.convervationid);
     provider.loadMessages(userId, widget.convervationid).then((_) {
       _scrollToBottom();

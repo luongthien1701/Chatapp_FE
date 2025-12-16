@@ -18,7 +18,7 @@ class SocketService {
     _userId = userId;
     print('🔌 Connecting as user $userId...');
     _channel = WebSocketChannel.connect(
-      Uri.parse('ws://192.168.200.1:8080/ws/chat?userId=$userId'),
+      Uri.parse('ws://localhost:8080/ws/chat?userId=$userId'),
     );
 
     _channel!.stream.listen(

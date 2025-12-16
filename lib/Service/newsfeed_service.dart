@@ -1,10 +1,9 @@
 import 'dart:convert';
-import 'package:chatapp/model/comment.dart';
+import 'package:chatapp/Service/ip.dart';
 import 'package:chatapp/model/newfeed.dart';
-import 'package:chatapp/model/userdto.dart';
 import 'package:http/http.dart' as http;
 class NewsfeedService {
-  final String baseUrl='http://192.168.200.1:8080/api';
+  String baseUrl = Ip().getIp();
   Future<List<NewfeedDTO>> getPost(int userId) async
   {
     final url=Uri.parse('$baseUrl/newsfeed/$userId');

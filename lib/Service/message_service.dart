@@ -1,8 +1,9 @@
 import 'dart:convert';
+import 'package:chatapp/Service/ip.dart';
 import 'package:http/http.dart' as http;
 import 'package:chatapp/model/message.dart';
 class MessageService {
-  final String baseUrl='http://192.168.200.1:8080/api';
+  String baseUrl = Ip().getIp();
   Future<List<MessageDTO>> getMessages(int userId, int conversationId) async
   {
     final url=Uri.parse('$baseUrl/messager/$conversationId');

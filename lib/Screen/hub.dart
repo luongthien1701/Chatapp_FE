@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:chatapp/Screen/newfeed.dart';
+import 'package:chatapp/Service/socket_service.dart';
 import 'package:chatapp/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -25,6 +28,8 @@ class _HubState extends State<Hub> {
   @override
   void initState() {
     super.initState();
+    final userId=context.read<UserProvider>().userId;
+    SocketService().connect(userId);
     _pages = [
       MessList(),
       Contact(),

@@ -1,9 +1,10 @@
 import 'dart:convert';
+import 'package:chatapp/Service/ip.dart';
 import 'package:chatapp/model/message.dart';
 import 'package:chatapp/model/userrequest.dart';
 import 'package:http/http.dart' as http;
 class AuthService {
-  final String baseUrl='http://192.168.200.1:8080/api';
+  String baseUrl = Ip().getIp();
   Future<SenderInfo> login(Loginrequest userlogin) async
   {
     final url=Uri.parse('$baseUrl/user/login');
