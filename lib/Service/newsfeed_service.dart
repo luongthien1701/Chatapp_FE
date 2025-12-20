@@ -19,4 +19,46 @@ class NewsfeedService {
       throw Exception("Không thể tìm thấy người dùng");
     }
   }
+  Future<void> likePost(int postId, int userId) async
+  {
+    final url=Uri.parse('$baseUrl/newsfeed/addlike');
+    final response=await http.put(url,
+    headers: {'Content-Type':'application/json'},
+    body: jsonEncode(
+      {
+        'postId':postId,
+        'userId':userId,
+      }
+    )
+    );
+    if (response.statusCode==200)
+    {
+      print("Like post thành công");
+    }
+    else
+    {
+      throw Exception("Like post thất bại");
+    }
+  }
+  Future<void> unlikePost(int postId, int userId) async
+  {
+    final url=Uri.parse('$baseUrl/newsfeed/removelike');
+    final response=await http.put(url,
+    headers: {'Content-Type':'application/json'},
+    body: jsonEncode(
+      {
+        'postId':postId,
+        'userId':userId,
+      }
+    )
+    );
+    if (response.statusCode==200)
+    {
+      print("Unlike post thành công");
+    }
+    else
+    {
+      throw Exception("Unlike post thất bại");
+    }
+  }
 }

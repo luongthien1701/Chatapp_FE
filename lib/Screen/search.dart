@@ -14,6 +14,7 @@ class Check extends StatefulWidget {
 
 class _Check extends State<Check> {
   int _index = 0;
+  Color color = Colors.black;
   final TextEditingController like = TextEditingController();
 
   @override
@@ -54,9 +55,10 @@ class _Check extends State<Check> {
                     margin: const EdgeInsets.symmetric(horizontal: 6),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
+                        color: _index==0? const Color.fromARGB(255, 87, 167, 233):Colors.transparent,
                         border: Border.all(width: 1),
                         borderRadius: const BorderRadius.all(Radius.circular(8))),
-                    child: const Text("Contact"),
+                    child: Text("Contact",style: TextStyle(color: _index==0?Colors.white:Colors.black)),
                   ),
                 ),
               ),
@@ -64,12 +66,14 @@ class _Check extends State<Check> {
                 child: GestureDetector(
                   onTap: () => setState(() => _index = 1),
                   child: Container(
+                    
                     margin: const EdgeInsets.symmetric(horizontal: 6),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
+                        color: _index==1? const Color.fromARGB(255, 87, 167, 233):Colors.transparent,
                         border: Border.all(width: 1),
                         borderRadius: const BorderRadius.all(Radius.circular(8))),
-                    child: const Text("Messages"),
+                    child: Text("Messages",style: TextStyle(color: _index==1?Colors.white:Colors.black, )),
                   ),
                 ),
               ),
@@ -80,9 +84,10 @@ class _Check extends State<Check> {
                     margin: const EdgeInsets.symmetric(horizontal: 6),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
+                        color: _index==2? const Color.fromARGB(255, 87, 167, 233):Colors.transparent,
                         border: Border.all(width: 1),
                         borderRadius: const BorderRadius.all(Radius.circular(8))),
-                    child: const Text("Chat Room"),
+                    child: Text("Chat Room",style: TextStyle(color: _index==2?Colors.white:Colors.black)),
                   ),
                 ),
               ),

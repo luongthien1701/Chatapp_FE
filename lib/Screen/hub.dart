@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:chatapp/Screen/newfeed.dart';
 import 'package:chatapp/Service/socket_service.dart';
 import 'package:chatapp/provider/user_provider.dart';
@@ -89,7 +87,7 @@ class _HubState extends State<Hub> {
       backgroundColor: const Color.fromARGB(255, 27, 92, 203),
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text(_state),
+        title: Text(_state, style: const TextStyle(color: Colors.white)),
         backgroundColor: const Color.fromARGB(255, 27, 92, 203),
         actions: [
           if (_index != 2 && _index != 3)
