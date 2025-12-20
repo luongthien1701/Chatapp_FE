@@ -1,4 +1,5 @@
 import 'package:chatapp/Screen/post.dart';
+import 'package:chatapp/model/message.dart';
 import 'package:chatapp/provider/comment_provider.dart';
 import 'package:chatapp/provider/newsfeed_provider.dart';
 import 'package:chatapp/provider/user_provider.dart';
@@ -155,15 +156,15 @@ class _NewfeedState extends State<Newfeed> {
 
                             const SizedBox(height: 12),
 
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(16),
-                              child: Image.asset(
-                                "assets/image/demo_backrgound.jpg",
-                                height: 200,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
+                            if (post.imageUrl != null && post.imageUrl!.isNotEmpty)
+                              Column(
+                                children: post.imageUrl!.map((imageUrl) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 8.0),
+                                    child: Image.network("http://localhost:8080"+imageUrl),
+                                  );
+                                }).toList(),
                               ),
-                            ),
 
                             const SizedBox(height: 10),
 
@@ -219,9 +220,8 @@ class _NewfeedState extends State<Newfeed> {
       context,
       listen: false,
     );
-
     commentProvider.fetchComments(postId);
-
+    final TextEditingController commentController = TextEditingController();
     showDialog(
       context: context,
       builder: (_) {
@@ -266,14 +266,13 @@ class _NewfeedState extends State<Newfeed> {
                     },
                   ),
                 ),
-
-                // Input comment
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: Row(
                     children: [
-                      const Expanded(
+                      Expanded(
                         child: TextField(
+                          controller: commentController,
                           decoration: InputDecoration(
                             hintText: "Write a comment...",
                           ),
@@ -281,7 +280,23 @@ class _NewfeedState extends State<Newfeed> {
                       ),
                       IconButton(
                         icon: const Icon(Icons.send),
-                        onPressed: () => Navigator.pop(context),
+                        onPressed: () {
+                          final content = commentController.text;
+                          if (content.isNotEmpty) {
+                            final sender = SenderInfo(
+                              id: userId,
+                              name: name,
+                              avatarUrl: "",
+                            );
+                            commentProvider.addComment(
+                              postId,
+                              sender,
+                              content,
+                            );
+                            commentController.clear();
+                            context.read<NewsfeedProvider>().increaseComment(postId);
+                          }
+                        },
                       ),
                     ],
                   ),

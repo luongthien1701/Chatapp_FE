@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:chatapp/Service/ip.dart';
+import 'package:chatapp/model/image.dart';
+import 'package:chatapp/model/message.dart';
 import 'package:chatapp/model/newfeed.dart';
 import 'package:http/http.dart' as http;
 class NewsfeedService {
@@ -11,7 +13,6 @@ class NewsfeedService {
     if (response.statusCode==200)
     {
       final data=jsonDecode(utf8.decode(response.bodyBytes)) as List;
-      print(data);
       return data.map(  (e) => NewfeedDTO.fromJson(e)).toList();
     }
     else
@@ -33,7 +34,6 @@ class NewsfeedService {
     );
     if (response.statusCode==200)
     {
-      print("Like post thành công");
     }
     else
     {
@@ -54,11 +54,54 @@ class NewsfeedService {
     );
     if (response.statusCode==200)
     {
-      print("Unlike post thành công");
     }
     else
     {
       throw Exception("Unlike post thất bại");
+    }
+  }
+  Future<void> addPostImage(PostImage postImage) async
+  {
+    final url=Uri.parse('$baseUrl/newsfeed/image');
+    final response=await http.post(url,
+    headers: {'Content-Type':'application/json'},
+    body: jsonEncode(
+      {
+        "id":0,
+        'postId':postImage.postId,
+        'imageUrl':postImage.imageUrl,
+      }
+    )
+    );
+    if (response.statusCode==200)
+    {
+    }
+    else
+    {
+      throw Exception("Thêm ảnh vào bài viết thất bại");
+    }
+  }
+  Future<int> createPost(SenderInfo senderInfo, String content) async
+  {
+    final url=Uri.parse('$baseUrl/newsfeed');
+    final response=await http.post(url,
+    headers: {'Content-Type':'application/json'},
+    body: jsonEncode(
+      {
+        'id':0,
+        'sender':senderInfo.toJson(),
+        'content':content,
+      }
+    )
+    );
+    if (response.statusCode==200)
+    {
+      final data=jsonDecode(utf8.decode(response.bodyBytes));
+      return data['id'];
+    }
+    else
+    {
+      throw Exception("Tạo bài viết thất bại");
     }
   }
 }

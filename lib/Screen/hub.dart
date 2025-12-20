@@ -1,5 +1,6 @@
 import 'package:chatapp/Screen/newfeed.dart';
 import 'package:chatapp/Service/socket_service.dart';
+import 'package:chatapp/provider/newsfeed_provider.dart';
 import 'package:chatapp/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -140,11 +141,15 @@ class _HubState extends State<Hub> {
         height: 70,
         backgroundColor: const Color.fromARGB(255, 27, 123, 202),
         indicatorColor: Colors.white.withOpacity(0.3),
-        onDestinationSelected: (i) {
+        onDestinationSelected: (i) async {
           setState(() {
             _index = i;
             _state = ["Messages", "Friends", "Profile", "News Feed"][i];
           });
+           if (i == 3) {
+          final userId = context.read<UserProvider>().userId;
+          await context.read<NewsfeedProvider>().fetchNewsfeed(userId);
+          }
         },
         destinations: const [
           NavigationDestination(

@@ -4,7 +4,7 @@ class NewfeedDTO {
   final int id;
   final SenderInfo senderId;
   final String content;
-  final String? imageUrl;
+  final List<String>? imageUrl;
   final int createdAt;
   int favorite;
   int comments;
@@ -24,7 +24,7 @@ class NewfeedDTO {
       id: json['id'],
       senderId: SenderInfo.fromJson(json['sender']),
       content: json['content'],
-      imageUrl: json['image'],
+      imageUrl: json['image'] != null ? List<String>.from(json['image']) : null,
       createdAt: json['createAt'],
       favorite: json['favorite'],
       comments: json['comments'],

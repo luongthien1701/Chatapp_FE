@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:chatapp/Service/ip.dart';
 import 'package:chatapp/model/comment.dart';
+import 'package:chatapp/model/message.dart';
 import 'package:http/http.dart' as http;
 class CommentService {
   String baseUrl = Ip().getIp();
@@ -19,30 +20,57 @@ class CommentService {
       throw Exception("Không thể tìm thấy bình luận");
     }
   }
-  Future<void> addComment(int postId, int userId, String content) async
+  Future<int> addComment(int postId, SenderInfo sender, String content) async
   {
-    final url=Uri.parse('$baseUrl/comment/add');
-    final response=await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'postId': postId,
-        'userId': userId,
-        'content': content,
-      }),
+    final url=Uri.parse('$baseUrl/comment');
+    final response=await http.post(url,
+    headers: {'Content-Type':'application/json'},
+    body: jsonEncode(
+      {
+        'id':0,
+        'postId':postId,
+        'sender':sender.toJson(),
+        'content':content,
+      }
+    )
     );
-    if (response.statusCode!=200)
+    if (response.statusCode==200)
     {
-      throw Exception("Không thể thêm bình luận");
+      print("Thêm bình luận thành công");
+      final data=jsonDecode(utf8.decode(response.bodyBytes));
+      return data['id'];      
+    }
+    else
+    {
+      throw Exception("Thêm bình luận thất bại");
     }
   }
   Future<void> deleteComment(int commentId) async
   {
-    final url=Uri.parse('$baseUrl/comment/delete/$commentId');
+    final url=Uri.parse('$baseUrl/comment/$commentId');
     final response=await http.delete(url);
     if (response.statusCode!=200)
     {
       throw Exception("Không thể xóa bình luận");
+    }
+  }
+  Future<void> editComment(int postId, SenderInfo sender, String content) async
+  {
+    final url=Uri.parse('$baseUrl/comment');
+    final response=await http.put(url,
+    headers: {'Content-Type':'application/json'},
+    body: jsonEncode(
+      {
+        'id':0,
+        'postId':postId,
+        'sender':sender.toJson(),
+        'content':content,
+      }
+    )
+    );
+    if (response.statusCode!=200)
+    {
+      throw Exception("Không thể sửa bình luận");
     }
   }
 }
