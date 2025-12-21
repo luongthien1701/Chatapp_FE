@@ -70,14 +70,14 @@ class MessageSend {
   final int senderId;
   final String content;
   final String? fileUrl;
-  final MessageType type;
+  final MessageType? type;
 
   MessageSend({
     required this.chatRoomId,
     required this.senderId,
     required this.content,
-    this.fileUrl,
-    this.type = MessageType.TEXT,
+    required this.fileUrl,
+    required this.type,
   });
 
   Map<String, dynamic> toJson() {
@@ -86,7 +86,7 @@ class MessageSend {
       'senderId': senderId,
       'content': content,
       'fileUrl': fileUrl,
-      'type': MessageType.TEXT.name,
+      'type': type.toString().split('.').last,
     };
   }
 }

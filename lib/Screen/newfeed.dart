@@ -159,9 +159,25 @@ class _NewfeedState extends State<Newfeed> {
                             if (post.imageUrl != null && post.imageUrl!.isNotEmpty)
                               Column(
                                 children: post.imageUrl!.map((imageUrl) {
-                                  return Padding(
-                                    padding: const EdgeInsets.only(bottom: 8.0),
-                                    child: Image.network("http://localhost:8080"+imageUrl),
+                                  return GestureDetector(
+                                    onTap: () {
+                                      showDialog(context: context,
+                                       builder: (context) => Dialog(
+                                        child: Hero(
+                                          tag: imageUrl,
+                                          child: Image.network("http://localhost:8080"+imageUrl),
+                                        ),
+                                       ),
+                                      );
+                                    },
+                                    child: Padding(
+                                      padding:
+                                          const EdgeInsets.only(bottom: 8.0),
+                                      child: Hero(
+                                        tag: imageUrl,
+                                        child: Image.network("http://localhost:8080"+imageUrl),
+                                      ),
+                                    ),
                                   );
                                 }).toList(),
                               ),

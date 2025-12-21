@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:io';
+import 'package:chatapp/Service/upload_service.dart';
 import 'package:flutter/material.dart';
 import 'package:chatapp/Service/chatroom_service.dart';
 import 'package:chatapp/Service/message_service.dart';
@@ -9,7 +11,7 @@ import 'package:chatapp/model/message.dart';
 class ConversationProvider with ChangeNotifier {
   final ChatroomService _chatroomService = ChatroomService();
   final MessageService _messageService = MessageService();
-
+  final UploadService _uploadService = UploadService();
   RoomDTO? room;
   List<MessageDTO> messages = [];
 
@@ -34,6 +36,19 @@ class ConversationProvider with ChangeNotifier {
     } catch (e) {
       debugPrint("❌ Lỗi loadMessages: $e");
     }
+  }
+
+  Future<String> upImageMessages(File img,int roomId) async
+  {
+    try{
+      String url=await _uploadService.uploadimage(img,"chat", roomId);
+      return url;
+    } 
+    catch (e) 
+    {
+      debugPrint("Đã xảy ra lỗi khi gửi tin nhắn ảnh");
+    }
+    return "";
   }
 
   void joinRoom(int userId, int roomId) {
@@ -85,4 +100,5 @@ class ConversationProvider with ChangeNotifier {
     };
     SocketService().sendMessage(payload);
   }
+  
 }

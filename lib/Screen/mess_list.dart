@@ -16,10 +16,10 @@ class _MessList extends State<MessList> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-    final provider = context.read<ChatroomProvider>();
-    final userId=context.read<UserProvider>().userId;
-    provider.fetchChatrooms(userId);
-    provider.startListening();
+      final provider = context.read<ChatroomProvider>();
+      final userId = context.read<UserProvider>().userId;
+      provider.fetchChatrooms(userId);
+      provider.startListening();
     });
   }
 
@@ -48,16 +48,27 @@ class _MessList extends State<MessList> {
                       ? const Icon(Icons.person)
                       : null,
                 ),
-                title: Text(room.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                subtitle: Text(room.lastMessage ?? "Chưa có tin nhắn"),
-                trailing: Text(room.time ?? "", style: const TextStyle(fontSize: 12)),
+                title: Text(
+                  room.name,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                subtitle: Text(
+                  room.lastMessage == null
+                      ? "Chưa có tin nhắn"
+                      : room.lastMessage!.isNotEmpty
+                      ? room.lastMessage!
+                      : "[Ảnh]",
+                ),
+
+                trailing: Text(
+                  room.time ?? "",
+                  style: const TextStyle(fontSize: 12),
+                ),
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => Conversation(
-                        convervationid: room.id,
-                      ),
+                      builder: (_) => Conversation(convervationid: room.id),
                     ),
                   );
                 },
