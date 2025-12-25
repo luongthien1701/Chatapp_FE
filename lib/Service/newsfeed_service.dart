@@ -20,6 +20,21 @@ class NewsfeedService {
       throw Exception("Không thể tìm thấy người dùng");
     }
   }
+  Future<List<NewfeedDTO>> getPostByUserId(int userId) async
+  {
+    final url=Uri.parse('$baseUrl/newsfeed/profile/$userId');
+    final response=await http.get(url);
+    if (response.statusCode==200)
+    {
+      final data=jsonDecode(utf8.decode(response.bodyBytes)) as List;
+      return data.map(  (e) => NewfeedDTO.fromJson(e)).toList();
+    }
+    else
+    {
+      throw Exception("Không thể tìm thấy người dùng");
+    }
+  }
+
   Future<void> likePost(int postId, int userId) async
   {
     final url=Uri.parse('$baseUrl/newsfeed/addlike');
@@ -102,6 +117,18 @@ class NewsfeedService {
     else
     {
       throw Exception("Tạo bài viết thất bại");
+    }
+  }
+  Future<void> deletePost(int postId) async
+  {
+    final url=Uri.parse('$baseUrl/newsfeed/$postId');
+    final response=await http.delete(url);
+    if (response.statusCode==200)
+    {
+    }
+    else
+    {
+      throw Exception("Xóa bài viết thất bại");
     }
   }
 }

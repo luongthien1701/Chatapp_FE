@@ -7,22 +7,30 @@ class SocketService {
   SocketService._internal();
 
   WebSocketChannel? _channel;
-  final _messageStreamController = StreamController<String>.broadcast();
+  final _controller = StreamController<String>.broadcast();
+
   int? _userId;
   int _retryCount = 0;
-  
-  Stream<String> get messages => _messageStreamController.stream;
+
+  Stream<String> get messages => _controller.stream;
+  bool get _isConnected => _channel != null && _channel!.closeCode == null;
 
   void connect(int userId) {
-    if (_channel != null) return;
+    if (_isConnected) return;
+
     _userId = userId;
-    print('🔌 Connecting as user $userId...');
+    print('🔌 Connecting as user $userId');
+
     _channel = WebSocketChannel.connect(
       Uri.parse('ws://localhost:8080/ws/chat?userId=$userId'),
     );
 
     _channel!.stream.listen(
-      (message) => _messageStreamController.add(message),
+      (message) {
+        _retryCount = 0;
+        final data = message is String ? message : jsonEncode(message);
+        _controller.add(data);
+      },
       onError: (e) {
         print('⚠️ Socket error: $e');
         _handleReconnect();
@@ -31,6 +39,7 @@ class SocketService {
         print('🔌 Socket closed');
         _handleReconnect();
       },
+      cancelOnError: true,
     );
   }
 
@@ -39,7 +48,7 @@ class SocketService {
     if (_userId != null) reconnect(_userId!);
   }
 
-  void reconnect(int userId) async {
+  Future<void> reconnect(int userId) async {
     if (_retryCount >= 5) return;
     _retryCount++;
     await Future.delayed(Duration(seconds: 2 * _retryCount));
@@ -47,11 +56,10 @@ class SocketService {
   }
 
   void sendMessage(Map<String, dynamic> data) {
-    if (_channel != null && _channel!.closeCode == null) {
-      print(data);
+    if (_isConnected) {
       _channel!.sink.add(jsonEncode(data));
     } else {
-      print('⚠️ Socket is closed, cannot send message');
+      print('⚠️ Socket closed, cannot send');
     }
   }
 
@@ -59,6 +67,5 @@ class SocketService {
     _channel?.sink.close();
     _channel = null;
     _retryCount = 0;
-    print('❌ Disconnected');
   }
 }

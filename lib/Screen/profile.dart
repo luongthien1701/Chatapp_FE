@@ -1,8 +1,8 @@
 import 'package:chatapp/Screen/account.dart';
+import 'package:chatapp/model/message.dart';
 import 'package:provider/provider.dart';
 import 'package:chatapp/Screen/login.dart';
 import 'package:chatapp/Service/profile_service.dart';
-import 'package:chatapp/model/userdto.dart';
 import 'package:chatapp/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 
@@ -28,8 +28,8 @@ class _Profile extends State<Profile> {
   }
   void loaddata() async
   {
-    UserDTO user=await profileService.getProfile(_userId);
-    name=user.displayName;
+    SenderInfo user=await profileService.getProfile(_userId);
+    name=user.name;
   }
   @override
   Widget build(BuildContext context) {

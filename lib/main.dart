@@ -1,4 +1,6 @@
+import 'package:chatapp/Screen/call.dart';
 import 'package:chatapp/provider/account_provider.dart';
+import 'package:chatapp/provider/call_provider.dart';
 import 'package:chatapp/provider/comment_provider.dart';
 import 'package:chatapp/provider/newsfeed_provider.dart';
 import 'package:chatapp/provider/search_provider.dart';
@@ -25,6 +27,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create:  (_) => NewsfeedProvider()),
         ChangeNotifierProvider(create:  (_) => CommentProvider()),
+        ChangeNotifierProvider(create:  (_) => CallProvider()),
       ],
       child: const MyApp(),
     ),

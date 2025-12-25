@@ -19,6 +19,14 @@ class NewsfeedProvider extends ChangeNotifier {
       print("❌ Lỗi khi tải newsfeed: $e");
     }
   }
+  Future<void> fetchNewsfeedByUserId(int userId) async {
+    try {
+      newsfeed = await newsfeedService.getPostByUserId(userId);
+      notifyListeners();
+    } catch (e) {
+      print("❌ Lỗi khi tải newsfeed theo userId: $e");
+    }
+  }
   void updatelike(int postId) 
   {
     final index = newsfeed.indexWhere((post) => post.id == postId);
@@ -89,6 +97,16 @@ class NewsfeedProvider extends ChangeNotifier {
     } catch (e) {
       print("❌ Lỗi khi tạo bài viết: $e");
       return -1;
+    }
+  }
+  Future<void> deletePost(int postId) async
+  {
+    try {
+      await newsfeedService.deletePost(postId);
+      newsfeed.removeWhere((post) => post.id == postId);
+      notifyListeners();
+    } catch (e) {
+      print("❌ Lỗi khi xóa bài viết: $e");
     }
   }
 }

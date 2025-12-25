@@ -1,17 +1,18 @@
 import 'dart:io';
-import 'package:chatapp/Screen/conversation.dart';
-import 'package:chatapp/Service/socket_service.dart';
-import 'package:chatapp/model/notification.dart';
 import 'package:chatapp/model/message.dart';
+import 'package:chatapp/model/newfeed.dart';
 import 'package:chatapp/provider/account_provider.dart';
+import 'package:chatapp/provider/comment_provider.dart';
+import 'package:chatapp/provider/newsfeed_provider.dart';
 import 'package:chatapp/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
+enum AccountAction { none, updateInfo, changePassword }
 
 class Account extends StatefulWidget {
-  final int friendId;
+  final int friendId; // 0 = profile của mình
   const Account({super.key, required this.friendId});
 
   @override
@@ -19,211 +20,192 @@ class Account extends StatefulWidget {
 }
 
 class _AccountState extends State<Account> {
-  final TextEditingController _displayname = TextEditingController();
-  final TextEditingController _email = TextEditingController();
-  final TextEditingController _phone = TextEditingController();
-  final TextEditingController _oldpassword = TextEditingController();
-  final TextEditingController _newpassword = TextEditingController();
-  final TextEditingController _repassword = TextEditingController();
-
-  final payload = {"event": "", "data": {}};
   final ImagePicker _picker = ImagePicker();
   File? _image;
-  bool check = false;
-  bool changepassword = false;
-  bool _initialized = false;
-  late final int userId;
+
+  AccountAction _currentAction = AccountAction.none;
+  late int userId;
+  late String name;
+
+  // ===== Controllers =====
+  final _displayNameCtrl = TextEditingController();
+  final _emailCtrl = TextEditingController();
+  final _phoneCtrl = TextEditingController();
+
+  final _oldPasswordCtrl = TextEditingController();
+  final _newPasswordCtrl = TextEditingController();
+  final _rePasswordCtrl = TextEditingController();
+
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_initialized) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        userId=context.read<UserProvider>().userId;
-        context.read<AccountProvider>().loadProfile(userId, widget.friendId);
-      });
-      _initialized = true;
-    }
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      userId = context.read<UserProvider>().userId;
+      name = context.read<UserProvider>().getDisplayname;
+      await context.read<AccountProvider>().loadProfile(
+        userId,
+        widget.friendId,
+      );
+
+      await context.read<NewsfeedProvider>().fetchNewsfeedByUserId(
+        widget.friendId == 0 ? userId : widget.friendId,
+      );
+
+      final profile = context.read<AccountProvider>().profile;
+      _displayNameCtrl.text = profile?.displayName ?? "";
+      _emailCtrl.text = profile?.email ?? "";
+      _phoneCtrl.text = profile?.phone ?? "";
+    });
   }
 
   Future<void> _pickImage() async {
-    final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _image = File(pickedFile.path);
-      });
+    final XFile? picked = await _picker.pickImage(source: ImageSource.gallery);
+    if (picked != null) {
+      setState(() => _image = File(picked.path));
     }
+  }
+
+  String timeago(int milisec) {
+    final now = DateTime.now();
+    final postTime = DateTime.fromMillisecondsSinceEpoch(milisec);
+    final diff = now.difference(postTime);
+    if (diff.inMinutes < 1) return "${diff.inSeconds} giây trước";
+    if (diff.inHours < 1) return "${diff.inMinutes} phút trước";
+    if (diff.inDays < 1) return "${diff.inHours} giờ trước";
+    return "${diff.inDays} ngày trước";
   }
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<AccountProvider>();
+    final accountProvider = context.watch<AccountProvider>();
 
-    if (provider.isLoading) {
-      return const Scaffold(
-        backgroundColor: Color.fromARGB(255, 152, 209, 255),
-        body: Center(child: CircularProgressIndicator()),
-      );
+    if (accountProvider.isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 152, 209, 255),
-      appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 152, 209, 255),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.more_vert, color: Colors.black),
-            onPressed: () {
-              showMenu(
-                context: context,
-                position: const RelativeRect.fromLTRB(200, 40, 0, 0),
-                items: [
-                  PopupMenuItem(
-                    child: Column(
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            // TODO: chặn người dùng
-                          },
-                          child: SizedBox(
-                            width: 150,
-                            child: Row(
-                              children: const [
-                                Icon(Icons.block, size: 16),
-                                SizedBox(width: 10),
-                                Flexible(child: Text("Chặn người dùng")),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Visibility(
-                          visible: provider.status == "ACCEPTED",
-                          child: GestureDetector(
-                            onTap: () {
-                              provider.deleteFriend(userId, widget.friendId);
-                            },
-                            child: SizedBox(
-                              width: 150,
-                              child: Row(
-                                children: const [
-                                  Icon(Icons.person, size: 16),
-                                  SizedBox(width: 10),
-                                  Flexible(child: Text("Xóa kết bạn")),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                ],
+      appBar: AppBar(title: const Text("Profile")),
+      body: CustomScrollView(
+        slivers: [
+          /// ===== PROFILE HEADER =====
+          SliverToBoxAdapter(child: _buildProfileHeader(accountProvider)),
+
+          /// ===== POSTS =====
+          Consumer<NewsfeedProvider>(
+            builder: (_, feedProvider, __) {
+              final posts = feedProvider.newsfeed;
+
+              if (posts.isEmpty) {
+                return const SliverFillRemaining(
+                  child: Center(child: Text("Chưa có bài viết")),
+                );
+              }
+
+              return SliverList(
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  return _buildPostCard(posts[index]);
+                }, childCount: posts.length),
               );
             },
           ),
         ],
       ),
-      body: provider.isMe ? _buildOwner(provider) : _buildGuest(provider),
     );
   }
 
-  // --------------------------- OWNER PROFILE ---------------------------
-  Widget _buildOwner(AccountProvider provider) {
-    _displayname.text = provider.profile?.displayName ?? "";
-    _email.text = provider.profile?.email ?? "";
-    _phone.text = provider.profile?.phone ?? "";
+  // ================= PROFILE HEADER =================
 
-    return SizedBox(
-      width: double.infinity,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const SizedBox(height: 30),
-          GestureDetector(
-            onTap: _pickImage,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                CircleAvatar(
-                  radius: 40,
-                  backgroundImage: _image != null
-                      ? FileImage(_image!)
-                      : const AssetImage("assets/image/avatar_default.png")
-                          as ImageProvider,
-                ),
-                const Icon(Icons.camera_alt, size: 50, color: Color.fromARGB(255, 197, 192, 192)),
-              ],
-            ),
+  Widget _buildProfileHeader(AccountProvider provider) {
+    return Column(
+      children: [
+        const SizedBox(height: 20),
+
+        GestureDetector(
+          onTap: provider.isMe
+              ? () async {
+                  await _pickImage();
+                  await context.read<UserProvider>().updateAvatar(_image!);
+                }
+              : null,
+          child: CircleAvatar(
+            radius: 45,
+            backgroundImage: _image != null
+                ? FileImage(_image!)
+                : const AssetImage("assets/image/avatar_default.png")
+                      as ImageProvider,
           ),
-          Text(provider.displayname, style: const TextStyle(fontSize: 20)),
-          const SizedBox(height: 50),
+        ),
 
+        const SizedBox(height: 10),
+
+        Text(
+          provider.displayname,
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+
+        const SizedBox(height: 12),
+
+        /// ===== ACTION BUTTONS (CHỈ OWNER) =====
+        if (provider.isMe)
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: check ? Colors.blue : Colors.white),
-                onPressed: () {
-                  setState(() {
-                    check = !check;
-                    changepassword = false;
-                  });
-                },
-                child: const Text("Cập nhật"),
-              ),
+              _actionButton("Cập nhật", AccountAction.updateInfo),
               const SizedBox(width: 10),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: changepassword ? Colors.blue : Colors.white),
-                onPressed: () {
-                  setState(() {
-                    changepassword = !changepassword;
-                    check = false;
-                  });
-                },
-                child: const Text("Đổi mật khẩu"),
-              ),
+              _actionButton("Đổi mật khẩu", AccountAction.changePassword),
             ],
           ),
-          const SizedBox(height: 30),
 
-          Expanded(
-            child: Stack(
-              children: [
-                AnimatedOpacity(
-                  opacity: changepassword ? 0 : 1,
-                  duration: const Duration(milliseconds: 500),
-                  child: Visibility(visible: !changepassword, child: _buildInfoForm()),
-                ),
-                AnimatedOpacity(
-                  opacity: changepassword ? 1 : 0,
-                  duration: const Duration(milliseconds: 500),
-                  child: Visibility(visible: changepassword, child: _buildChangePasswordForm()),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+        const SizedBox(height: 10),
+
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          child: _buildActionForm(),
+        ),
+
+        const Divider(thickness: 2),
+      ],
     );
   }
 
-  Widget _buildInfoForm() {
+  Widget _actionButton(String title, AccountAction action) {
+    return ElevatedButton(
+      onPressed: () {
+        setState(() {
+          _currentAction = _currentAction == action
+              ? AccountAction.none
+              : action;
+        });
+      },
+      child: Text(title),
+    );
+  }
+
+  // ================= FORMS =================
+
+  Widget _buildActionForm() {
+    switch (_currentAction) {
+      case AccountAction.updateInfo:
+        return _buildUpdateInfoForm();
+      case AccountAction.changePassword:
+        return _buildChangePasswordForm();
+      default:
+        return const SizedBox();
+    }
+  }
+
+  Widget _buildUpdateInfoForm() {
     return Column(
+      key: const ValueKey("updateInfo"),
       children: [
-        _textField("Username", _displayname, readOnly: !check),
-        _divider(),
-        _textField("Email", _email, readOnly: !check),
-        _divider(),
-        _textField("Phone", _phone, readOnly: !check),
-        AnimatedOpacity(
-          opacity: check ? 1 : 0,
-          duration: const Duration(milliseconds: 400),
-          child: ElevatedButton(
-            onPressed: () {
-              // TODO: gọi API cập nhật thông tin
-            },
-            child: const Text("Xác nhận"),
-          ),
+        _textField("Tên hiển thị", _displayNameCtrl),
+        _textField("Email", _emailCtrl),
+        _textField("Số điện thoại", _phoneCtrl),
+        ElevatedButton(
+          onPressed: () {
+            // TODO: gọi API update info
+          },
+          child: const Text("Lưu thay đổi"),
         ),
       ],
     );
@@ -231,94 +213,246 @@ class _AccountState extends State<Account> {
 
   Widget _buildChangePasswordForm() {
     return Column(
+      key: const ValueKey("changePassword"),
       children: [
-        _textField("Mật khẩu cũ", _oldpassword, obscure: true),
-        _divider(),
-        _textField("Mật khẩu mới", _newpassword, obscure: true),
-        _divider(),
-        _textField("Nhập lại mật khẩu", _repassword, obscure: true),
-        const SizedBox(height: 30),
+        _textField("Mật khẩu cũ", _oldPasswordCtrl, obscure: true),
+        _textField("Mật khẩu mới", _newPasswordCtrl, obscure: true),
+        _textField("Nhập lại mật khẩu", _rePasswordCtrl, obscure: true),
         ElevatedButton(
           onPressed: () {
             // TODO: gọi API đổi mật khẩu
           },
-          child: const Text("Xác nhận đổi mật khẩu"),
+          child: const Text("Đổi mật khẩu"),
         ),
       ],
     );
   }
 
-  Widget _textField(String label, TextEditingController controller, {bool readOnly = false, bool obscure = false}) {
-    return Container(
-      padding: const EdgeInsets.all(10),
+  Widget _textField(
+    String label,
+    TextEditingController controller, {
+    bool obscure = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.all(8),
       child: TextField(
         controller: controller,
-        readOnly: readOnly,
         obscureText: obscure,
         decoration: InputDecoration(
           labelText: label,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         ),
       ),
     );
   }
 
-  Widget _divider() => const Divider(color: Colors.black38, thickness: 2);
+  // ================= POST CARD =================
 
-  // --------------------------- FRIEND PROFILE ---------------------------
-  Widget _buildGuest(AccountProvider provider) {
-    return Column(
-      children: [
-        const SizedBox(height: 30),
-        const CircleAvatar(
-          radius: 40,
-          backgroundImage: AssetImage("assets/image/avatar_default.png"),
-        ),
-        const SizedBox(height: 20),
-        Text(provider.displayname, style: const TextStyle(fontSize: 20)),
-        const SizedBox(height: 20),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+  Widget _buildPostCard(NewfeedDTO post) {
+    return Card(
+      margin: const EdgeInsets.all(8),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (provider.status == "NONE")
-              ElevatedButton(
-                onPressed: () {
-                  provider.addFriend(userId, widget.friendId);
-                  final notification = NotiDTO(
-                    title: "đã gửi lời mời kết bạn",
-                    senderId: SenderInfo(id: userId, name: provider.displayname, avatarUrl: ""),
-                    receiverId: widget.friendId,
-                    status: false,
-                    createdAt: DateTime.now().millisecondsSinceEpoch,
+            Row(
+              children: [
+                const CircleAvatar(
+                  radius: 25,
+                  backgroundImage: AssetImage(
+                    "assets/image/avatar_default.png",
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      post.senderId.name,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      timeago(post.createdAt),
+                      style: const TextStyle(color: Colors.grey),
+                    ),
+                  ],
+                ),
+                Spacer(),
+                Visibility(
+                  visible: widget.friendId == 0,
+                  child: IconButton(
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text("Xác nhận xóa bài viết"),
+                          content: const Text(
+                            "Bạn có chắc chắn muốn xóa bài viết này không?",
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text("Hủy"),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                context.read<NewsfeedProvider>().deletePost(
+                                  post.id,
+                                );
+                                Navigator.pop(context);
+                              },
+                              child: const Text("Xóa"),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    icon: Icon(Icons.delete),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(post.content),
+
+            const SizedBox(height: 12),
+
+            if (post.imageUrl != null && post.imageUrl!.isNotEmpty)
+              Column(
+                children: post.imageUrl!.map((imageUrl) {
+                  return GestureDetector(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => Dialog(
+                          child: Hero(
+                            tag: post.id,
+                            child: Image.network(imageUrl),
+                          ),
+                        ),
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Hero(tag: post.id, child: Image.network(imageUrl)),
+                    ),
                   );
-                  payload["event"] = "notification";
-                  payload["data"] = notification.toJson();
-                  SocketService().sendMessage(payload);
-                },
-                child: const Text("Kết bạn"),
+                }).toList(),
               ),
-            if (provider.status == "PENDING")
-              ElevatedButton(
-                onPressed: () => provider.deleteFriend(userId, widget.friendId),
-                child: const Text("Đã gửi lời mời"),
-              ),
-            if (provider.status == "RECEIVED")
-              ElevatedButton(
-                onPressed: () => provider.acceptFriend(userId, widget.friendId),
-                child: const Text("Chấp nhận"),
-              ),
-            const SizedBox(width: 10),
-            ElevatedButton(
-              onPressed: () async {
-                final id = await provider.findRoom(userId, widget.friendId);
-                if (!mounted) return;
-                Navigator.push(context, MaterialPageRoute(builder: (context) => Conversation(convervationid: id)));
-              },
-              child: const Text("Gửi tin nhắn"),
+            Row(
+              children: [
+                IconButton(
+                  onPressed: () {},
+                  icon: Icon(
+                    post.isFavorite ? Icons.favorite : Icons.favorite_border,
+                    color: post.isFavorite ? Colors.red : Colors.black,
+                  ),
+                ),
+                Text(post.favorite.toString()),
+
+                IconButton(
+                  onPressed: () => _openCommentDialog(context, postId: post.id),
+                  icon: const Icon(Icons.comment),
+                ),
+                Text(post.comments.toString()),
+              ],
             ),
           ],
         ),
-      ],
+      ),
+    );
+  }
+
+  void _openCommentDialog(BuildContext context, {required int postId}) {
+    final commentProvider = Provider.of<CommentProvider>(
+      context,
+      listen: false,
+    );
+    commentProvider.fetchComments(postId);
+    final TextEditingController commentController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (_) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: SizedBox(
+            height: 400,
+            child: Column(
+              children: [
+                const Padding(
+                  padding: EdgeInsets.all(12),
+                  child: Text(
+                    "Comments",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+
+                Expanded(
+                  child: Consumer<CommentProvider>(
+                    builder: (_, provider, __) {
+                      if (provider.isLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+
+                      return ListView.builder(
+                        itemCount: provider.comments.length,
+                        itemBuilder: (_, index) {
+                          final comment = provider.comments[index];
+                          return ListTile(
+                            leading: const CircleAvatar(
+                              backgroundImage: AssetImage(
+                                "assets/image/avatar_default.png",
+                              ),
+                            ),
+                            title: Text(comment.sender.name),
+                            subtitle: Text(comment.content),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: commentController,
+                          decoration: InputDecoration(
+                            hintText: "Write a comment...",
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.send),
+                        onPressed: () {
+                          final content = commentController.text;
+                          if (content.isNotEmpty) {
+                            final sender = SenderInfo(
+                              avatarUrl: "",
+                              id: userId,
+                              name: name,
+                            );
+                            commentProvider.addComment(postId, sender, content);
+                            commentController.clear();
+                            context.read<NewsfeedProvider>().increaseComment(
+                              postId,
+                            );
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

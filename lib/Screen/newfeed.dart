@@ -165,7 +165,7 @@ class _NewfeedState extends State<Newfeed> {
                                        builder: (context) => Dialog(
                                         child: Hero(
                                           tag: imageUrl,
-                                          child: Image.network("http://localhost:8080"+imageUrl),
+                                          child: Image.network(imageUrl),
                                         ),
                                        ),
                                       );
@@ -175,7 +175,7 @@ class _NewfeedState extends State<Newfeed> {
                                           const EdgeInsets.only(bottom: 8.0),
                                       child: Hero(
                                         tag: imageUrl,
-                                        child: Image.network("http://localhost:8080"+imageUrl),
+                                        child: Image.network(imageUrl),
                                       ),
                                     ),
                                   );

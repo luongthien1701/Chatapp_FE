@@ -10,10 +10,7 @@ import 'package:chatapp/provider/convervasion_provider.dart';
 class Conversation extends StatefulWidget {
   final int convervationid;
 
-  const Conversation({
-    super.key,
-    required this.convervationid,
-  });
+  const Conversation({super.key, required this.convervationid});
 
   @override
   State<Conversation> createState() => _ConversationState();
@@ -25,12 +22,12 @@ class _ConversationState extends State<Conversation> {
   late final ConversationProvider provider;
   late final int userId;
   File? file;
-  final ImagePicker imagePicker=ImagePicker();
+  final ImagePicker imagePicker = ImagePicker();
   @override
   void initState() {
     super.initState();
     provider = context.read<ConversationProvider>();
-    userId=context.read<UserProvider>().userId;
+    userId = context.read<UserProvider>().userId;
     provider.loadRoomInfo(widget.convervationid);
     provider.loadMessages(userId, widget.convervationid).then((_) {
       _scrollToBottom();
@@ -41,16 +38,18 @@ class _ConversationState extends State<Conversation> {
 
   @override
   void dispose() {
-    provider.leaveRoom(userId, widget.convervationid); 
+    provider.leaveRoom(userId, widget.convervationid);
     super.dispose();
   }
-  Future<void> pickImage() async
-  {
-    final XFile? img=await imagePicker.pickImage(source: ImageSource.gallery, imageQuality: 70);
-    if (img!=null)
-    {
+
+  Future<void> pickImage() async {
+    final XFile? img = await imagePicker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 70,
+    );
+    if (img != null) {
       setState(() {
-        file=File(img.path);
+        file = File(img.path);
       });
     }
   }
@@ -82,6 +81,21 @@ class _ConversationState extends State<Conversation> {
             Navigator.pop(context);
           },
         ),
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: Icon(Icons.call, color: Colors.white),
+          ),
+
+          IconButton(
+            onPressed: () {},
+            icon: Icon(Icons.videocam, color: Colors.white),
+          ),
+          IconButton(
+            icon: const Icon(Icons.more_vert, color: Colors.white),
+            onPressed: () {},
+          ),
+        ],
         title: Row(
           children: [
             CircleAvatar(
@@ -99,6 +113,7 @@ class _ConversationState extends State<Conversation> {
           ],
         ),
       ),
+
       body: SafeArea(
         child: Column(
           children: [
@@ -129,36 +144,37 @@ class _ConversationState extends State<Conversation> {
                               : const Color.fromARGB(255, 93, 167, 227),
                           borderRadius: BorderRadius.circular(14),
                         ),
-                        child: msg.fileUrl!=null ? 
-                        GestureDetector(
-                          onTap: () {
-                            showDialog(context: context,
-                             builder: (context) => Dialog(
-                              child: Hero(
-                                tag: msg.id,
-                                child: Image.network(
-                                  "http://localhost:8080"+msg.fileUrl!,
-                                  fit: BoxFit.cover,
+                        child: msg.fileUrl != null
+                            ? GestureDetector(
+                                onTap: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => Dialog(
+                                      child: Hero(
+                                        tag: msg.id,
+                                        child: Image.network(
+                                          "http://localhost:8080" +
+                                              msg.fileUrl!,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: Hero(
+                                  tag: msg.id,
+                                  child: Image.network(
+                                    "http://localhost:8080" + msg.fileUrl!,
+                                    width: 200,
+                                    height: 200,
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
+                              )
+                            : Text(
+                                msg.content,
+                                style: const TextStyle(fontSize: 16),
                               ),
-                             ),
-                          );
-                          },
-                          child: Hero(
-                            tag: msg.id,
-                            child: Image.network(
-                              "http://localhost:8080"+msg.fileUrl!,
-                              width: 200,
-                              height: 200,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        )   
-                        : 
-                        Text(
-                          msg.content,
-                          style: const TextStyle(fontSize: 16),
-                        ),
                       ),
                     );
                   },
@@ -166,32 +182,32 @@ class _ConversationState extends State<Conversation> {
               ),
             ),
             Wrap(
+              children: [
+                if (file != null)
+                  Stack(
                     children: [
-                      if (file != null)
-                        Stack(
-                          children: [
-                            Image.file(
-                              file!,
-                              width: 200,
-                              height: 200,
-                              fit: BoxFit.cover,
-                            ),
-                            Positioned(
-                              right: -10,
-                              top: -10,
-                              child: IconButton(
-                                icon: const Icon(Icons.close, color: Colors.red),
-                                onPressed: () {
-                                  setState(() {
-                                    file = null;
-                                  });
-                                },
-                              ),
-                            ),
-                          ],
+                      Image.file(
+                        file!,
+                        width: 200,
+                        height: 200,
+                        fit: BoxFit.cover,
+                      ),
+                      Positioned(
+                        right: -10,
+                        top: -10,
+                        child: IconButton(
+                          icon: const Icon(Icons.close, color: Colors.red),
+                          onPressed: () {
+                            setState(() {
+                              file = null;
+                            });
+                          },
                         ),
+                      ),
                     ],
                   ),
+              ],
+            ),
             Container(
               color: const Color.fromARGB(255, 124, 207, 245),
               padding: const EdgeInsets.all(8.0),
@@ -211,23 +227,35 @@ class _ConversationState extends State<Conversation> {
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(width: 10),
-                  IconButton(onPressed: () {
-                    pickImage();
-                  }, 
-                  icon: Icon(Icons.photo)),
+                  IconButton(
+                    onPressed: () {
+                      pickImage();
+                    },
+                    icon: Icon(Icons.photo),
+                  ),
                   IconButton(
                     icon: const Icon(Icons.send, color: Colors.white),
-                    onPressed: ()  async {
-                      String url=await provider.upImageMessages(file!, widget.convervationid);
-                      if (messageController.text.trim().isEmpty && (url.isEmpty && file != null)) return;
+                    onPressed: () async {
+                       String url = "";
+                       if (file != null) 
+                       { 
+                        url = await provider.upImageMessages(
+                        file!,
+                        widget.convervationid,
+                      );}
+                      if (messageController.text.trim().isEmpty &&
+                          (url.isEmpty && file != null))
+                        return;
                       final msg = MessageSend(
                         chatRoomId: widget.convervationid,
                         senderId: userId,
                         content: messageController.text,
                         fileUrl: url,
-                        type: url.isNotEmpty ? MessageType.IMAGE : MessageType.TEXT
+                        type: url.isNotEmpty
+                            ? MessageType.IMAGE
+                            : MessageType.TEXT,
                       );
                       debugPrint("Sending message: ${msg.toJson()}");
                       provider.sendMessage(msg);

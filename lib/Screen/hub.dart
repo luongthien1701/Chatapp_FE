@@ -1,5 +1,9 @@
+import 'dart:convert';
+
+import 'package:chatapp/Screen/call.dart';
 import 'package:chatapp/Screen/newfeed.dart';
 import 'package:chatapp/Service/socket_service.dart';
+import 'package:chatapp/provider/call_provider.dart';
 import 'package:chatapp/provider/newsfeed_provider.dart';
 import 'package:chatapp/provider/user_provider.dart';
 import 'package:flutter/material.dart';
@@ -21,19 +25,47 @@ class Hub extends StatefulWidget {
 class _HubState extends State<Hub> {
   int _index = 0;
   
-  String _state = "Messages";
+  String _state = "News Feed";
   late List<Widget> _pages;
 
   @override
   void initState() {
     super.initState();
-    final userId=context.read<UserProvider>().userId;
-    SocketService().connect(userId);
-    _pages = [
+
+    final userId = context.read<UserProvider>().userId;
+    final socket = SocketService();
+
+    socket.connect(userId);
+
+    socket.messages.listen((data) {
+      final msg = jsonDecode(data);
+
+      switch (msg['event']) {
+        case 'notification':
+          context.read<NotificationProvider>().onReceive(msg);
+          break;
+
+        case 'incoming_call':
+          context.read<CallProvider>().onReceive(msg);
+          Navigator.push(context, MaterialPageRoute(
+            builder: (context) => Call(
+              callerId: context.read<CallProvider>().userId!,
+            ),
+          ));
+          break;
+
+        // sau này thêm:
+        // case 'chat_message':
+        //   context.read<MessageProvider>().onReceive(msg);
+        //   break;
+      }
+    });
+
+    _pages = const [
+      Newfeed(),
       MessList(),
       Contact(),
       Profile(),
-      Newfeed(),
     ];
   }
 
@@ -91,7 +123,7 @@ class _HubState extends State<Hub> {
         title: Text(_state, style: const TextStyle(color: Colors.white)),
         backgroundColor: const Color.fromARGB(255, 27, 92, 203),
         actions: [
-          if (_index != 2 && _index != 3)
+          if (_index != 0 && _index != 3)
             Row(
               children: [
                 IconButton(
@@ -144,14 +176,19 @@ class _HubState extends State<Hub> {
         onDestinationSelected: (i) async {
           setState(() {
             _index = i;
-            _state = ["Messages", "Friends", "Profile", "News Feed"][i];
+            _state = ["News Feed","Messages", "Friends", "Profile" ][i];
           });
-           if (i == 3) {
+           if (i == 0) {
           final userId = context.read<UserProvider>().userId;
           await context.read<NewsfeedProvider>().fetchNewsfeed(userId);
           }
         },
         destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.newspaper_outlined),
+            selectedIcon: Icon(Icons.newspaper, color: Colors.white),
+            label: "News Feed",
+          ),
           NavigationDestination(
             icon: Icon(Icons.message_outlined),
             selectedIcon: Icon(Icons.message, color: Colors.white),
@@ -167,11 +204,7 @@ class _HubState extends State<Hub> {
             selectedIcon: Icon(Icons.person, color: Colors.white),
             label: "Profile",
           ),
-          NavigationDestination(
-            icon: Icon(Icons.newspaper_outlined),
-            selectedIcon: Icon(Icons.newspaper, color: Colors.white),
-            label: "News Feed",
-          ),
+          
         ],
       ),
     );
