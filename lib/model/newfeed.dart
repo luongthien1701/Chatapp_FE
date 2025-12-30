@@ -1,4 +1,4 @@
-import 'package:chatapp/model/message.dart';
+import 'package:rela/model/message.dart';
 
 class NewfeedDTO {
   final int id;

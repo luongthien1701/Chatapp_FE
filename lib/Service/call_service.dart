@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:http/http.dart' as http;
-import 'package:chatapp/Service/ip.dart';
+import 'package:rela/Service/ip.dart';
 
 class CallService {
   String baseUrl = Ip().getIp();

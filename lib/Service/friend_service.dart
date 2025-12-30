@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'package:chatapp/Service/ip.dart';
-import 'package:chatapp/model/friend.dart';
+import 'package:rela/Service/ip.dart';
+import 'package:rela/model/friend.dart';
 import 'package:http/http.dart' as http;
 class FriendService {
   String baseUrl = Ip().getIp();

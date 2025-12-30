@@ -1,17 +1,17 @@
-import 'package:chatapp/Screen/CallScreen.dart';
-import 'package:chatapp/Screen/IncommingCall.dart';
-import 'package:chatapp/provider/account_provider.dart';
-import 'package:chatapp/provider/call_provider.dart';
-import 'package:chatapp/provider/comment_provider.dart';
-import 'package:chatapp/provider/newsfeed_provider.dart';
-import 'package:chatapp/provider/search_provider.dart';
-import 'package:chatapp/provider/user_provider.dart';
+import 'package:rela/Screen/CallScreen.dart';
+import 'package:rela/Screen/IncommingCall.dart';
+import 'package:rela/provider/account_provider.dart';
+import 'package:rela/provider/call_provider.dart';
+import 'package:rela/provider/comment_provider.dart';
+import 'package:rela/provider/newsfeed_provider.dart';
+import 'package:rela/provider/search_provider.dart';
+import 'package:rela/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart'; 
-import 'package:chatapp/provider/mess_list_provider.dart'; 
-import 'package:chatapp/provider/notification_provider.dart'; 
-import 'package:chatapp/provider/convervasion_provider.dart'; 
-import 'package:chatapp/provider/contact_provider.dart'; 
+import 'package:rela/provider/mess_list_provider.dart'; 
+import 'package:rela/provider/notification_provider.dart'; 
+import 'package:rela/provider/convervasion_provider.dart'; 
+import 'package:rela/provider/contact_provider.dart'; 
 
 import 'Screen/login.dart';
 
