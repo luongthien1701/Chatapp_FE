@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'package:chatapp/Service/ip.dart';
+import 'package:rela/Service/ip.dart';
 import 'package:http/http.dart' as http;
-import 'package:chatapp/model/message.dart';
+import 'package:rela/model/message.dart';
 class MessageService {
   String baseUrl = Ip().getIp();
   Future<List<MessageDTO>> getMessages(int userId, int conversationId) async

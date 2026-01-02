@@ -1,5 +1,5 @@
-import 'package:chatapp/model/userrequest.dart';
-import 'package:chatapp/Service/auth_service.dart';
+import 'package:rela/model/userrequest.dart';
+import 'package:rela/Service/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'login.dart';
 

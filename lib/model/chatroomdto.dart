@@ -4,8 +4,8 @@ class RoomDTO {
   final String? avatarUrl;
   final String? lastMessage;
   final String? group;
-  final String? time;           // Chuỗi hiển thị HH:mm
-  final int? sendTimestamp;     // Giá trị millis để sort
+  final String? time;           
+  final int? sendTimestamp;     
 
   RoomDTO({
     required this.id,

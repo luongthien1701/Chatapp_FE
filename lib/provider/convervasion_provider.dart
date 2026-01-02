@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:chatapp/Service/upload_service.dart';
+import 'package:rela/Service/upload_service.dart';
 import 'package:flutter/material.dart';
-import 'package:chatapp/Service/chatroom_service.dart';
-import 'package:chatapp/Service/message_service.dart';
-import 'package:chatapp/Service/socket_service.dart';
-import 'package:chatapp/model/chatroomdto.dart';
-import 'package:chatapp/model/message.dart';
+import 'package:rela/Service/chatroom_service.dart';
+import 'package:rela/Service/message_service.dart';
+import 'package:rela/Service/socket_service.dart';
+import 'package:rela/model/chatroomdto.dart';
+import 'package:rela/model/message.dart';
 
 class ConversationProvider with ChangeNotifier {
   final ChatroomService _chatroomService = ChatroomService();
@@ -95,7 +95,6 @@ class ConversationProvider with ChangeNotifier {
 
       notifyListeners();
 
-      // ✅ scroll sau khi UI rebuild
       WidgetsBinding.instance.addPostFrameCallback((_) {
         onNewMessage?.call();
       });
@@ -104,8 +103,6 @@ class ConversationProvider with ChangeNotifier {
 
   return Future.value();
 }
-
-
   void sendMessage(MessageSend msg) {
     final payload = {"event": "message", "data": msg.toJson()};
     SocketService().sendMessage(payload);

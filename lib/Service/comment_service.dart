@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'package:chatapp/Service/ip.dart';
-import 'package:chatapp/model/comment.dart';
-import 'package:chatapp/model/message.dart';
+import 'package:rela/Service/ip.dart';
+import 'package:rela/model/comment.dart';
+import 'package:rela/model/message.dart';
 import 'package:http/http.dart' as http;
 class CommentService {
   String baseUrl = Ip().getIp();

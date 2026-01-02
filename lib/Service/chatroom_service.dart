@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'package:chatapp/Service/ip.dart';
-import 'package:chatapp/model/chatroomdto.dart';
+import 'package:rela/Service/ip.dart';
+import 'package:rela/model/chatroomdto.dart';
 import 'package:http/http.dart' as http;
 class ChatroomService {
   String baseUrl = Ip().getIp();

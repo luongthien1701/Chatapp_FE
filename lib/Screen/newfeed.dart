@@ -1,8 +1,10 @@
-import 'package:chatapp/Screen/post.dart';
-import 'package:chatapp/model/message.dart';
-import 'package:chatapp/provider/comment_provider.dart';
-import 'package:chatapp/provider/newsfeed_provider.dart';
-import 'package:chatapp/provider/user_provider.dart';
+import 'package:rela/Screen/post.dart';
+import 'package:rela/model/message.dart';
+import 'package:rela/model/notification.dart';
+import 'package:rela/provider/comment_provider.dart';
+import 'package:rela/provider/newsfeed_provider.dart';
+import 'package:rela/provider/notification_provider.dart';
+import 'package:rela/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -14,17 +16,17 @@ class Newfeed extends StatefulWidget {
 }
 
 class _NewfeedState extends State<Newfeed> {
-  List<bool> isLike = []; // mỗi post có 1 trạng thái like riêng
+  List<bool> isLike = [];
   List<Newfeed> posts = [];
   late final int userId;
-  late String name='';
+  late String name = '';
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final provider = Provider.of<NewsfeedProvider>(context, listen: false);
       userId = context.read<UserProvider>().userId;
-      name=context.read<UserProvider>().getDisplayname;
+      name = context.read<UserProvider>().getDisplayname;
       await provider.fetchNewsfeed(userId);
 
       setState(() {
@@ -51,6 +53,7 @@ class _NewfeedState extends State<Newfeed> {
 
   @override
   Widget build(BuildContext context) {
+    final noti = context.read<NotificationProvider>();
     return Scaffold(
       body: Consumer<NewsfeedProvider>(
         builder: (context, provider, _) {
@@ -62,7 +65,6 @@ class _NewfeedState extends State<Newfeed> {
                 backgroundColor: Colors.blueAccent,
                 expandedHeight: 30,
                 pinned: false,
-
                 flexibleSpace: SafeArea(
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -74,9 +76,7 @@ class _NewfeedState extends State<Newfeed> {
                             "assets/image/avatar_default.png",
                           ),
                         ),
-
                         const SizedBox(width: 10),
-
                         Expanded(
                           child: TextField(
                             readOnly: true,
@@ -103,7 +103,6 @@ class _NewfeedState extends State<Newfeed> {
                   ),
                 ),
               ),
-
               if (posts.isEmpty)
                 const SliverFillRemaining(
                   child: Center(child: Text("Không có bài viết")),
@@ -156,18 +155,20 @@ class _NewfeedState extends State<Newfeed> {
 
                             const SizedBox(height: 12),
 
-                            if (post.imageUrl != null && post.imageUrl!.isNotEmpty)
+                            if (post.imageUrl != null &&
+                                post.imageUrl!.isNotEmpty)
                               Column(
                                 children: post.imageUrl!.map((imageUrl) {
                                   return GestureDetector(
                                     onTap: () {
-                                      showDialog(context: context,
-                                       builder: (context) => Dialog(
-                                        child: Hero(
-                                          tag: imageUrl,
-                                          child: Image.network(imageUrl),
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) => Dialog(
+                                          child: Hero(
+                                            tag: imageUrl,
+                                            child: Image.network(imageUrl),
+                                          ),
                                         ),
-                                       ),
                                       );
                                     },
                                     child: Padding(
@@ -192,6 +193,15 @@ class _NewfeedState extends State<Newfeed> {
                                       provider.updatelike(post.id);
                                       if (post.isFavorite) {
                                         provider.likePost(post.id, userId);
+                                        NotiDTO notification = NotiDTO(
+                                            title: "",
+                                            status: false,
+                                            createdAt: 0,
+                                            senderId: SenderInfo(
+                                                id: userId, name: name),
+                                            receiverId: post.id,
+                                            type: "like_post");
+                                        noti.sendNotification(notification);
                                       } else {
                                         provider.unlikePost(post.id, userId);
                                       }
@@ -207,7 +217,6 @@ class _NewfeedState extends State<Newfeed> {
                                   ),
                                 ),
                                 Text(post.favorite.toString()),
-
                                 IconButton(
                                   onPressed: () => _openCommentDialog(
                                     context,
@@ -236,6 +245,7 @@ class _NewfeedState extends State<Newfeed> {
       context,
       listen: false,
     );
+    final noti = context.read<NotificationProvider>();
     commentProvider.fetchComments(postId);
     final TextEditingController commentController = TextEditingController();
     showDialog(
@@ -256,7 +266,6 @@ class _NewfeedState extends State<Newfeed> {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
-
                 Expanded(
                   child: Consumer<CommentProvider>(
                     builder: (_, provider, __) {
@@ -309,8 +318,18 @@ class _NewfeedState extends State<Newfeed> {
                               sender,
                               content,
                             );
+                            NotiDTO notification = NotiDTO(
+                                title: "",
+                                status: false,
+                                createdAt: 0,
+                                senderId: SenderInfo(id: userId, name: name),
+                                receiverId: postId,
+                                type: "comment");
+                            noti.sendNotification(notification);
                             commentController.clear();
-                            context.read<NewsfeedProvider>().increaseComment(postId);
+                            context
+                                .read<NewsfeedProvider>()
+                                .increaseComment(postId);
                           }
                         },
                       ),
@@ -324,18 +343,16 @@ class _NewfeedState extends State<Newfeed> {
       },
     );
   }
-  void _openUpPostDialog(BuildContext context) 
-  {
-    showDialog(context: context, 
-    builder: (_) 
-    {
-      return Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10)
-        ),
-        child: Post(),
-      );
-    }
-    );
+
+  void _openUpPostDialog(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (_) {
+          return Dialog(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            child: Post(),
+          );
+        });
   }
 }

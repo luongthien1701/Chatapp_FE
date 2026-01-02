@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'package:chatapp/Service/ip.dart';
-import 'package:chatapp/model/search.dart';
+import 'package:rela/Service/ip.dart';
+import 'package:rela/model/search.dart';
 import 'package:http/http.dart' as http;
 class SearchService {
   String baseUrl = Ip().getIp();

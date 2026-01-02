@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:chatapp/provider/call_provider.dart';
+import 'package:rela/provider/call_provider.dart';
 import 'IncommingCall.dart';
 import 'InCallUI.dart';
 

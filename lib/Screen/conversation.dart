@@ -1,13 +1,15 @@
 import 'dart:io';
 
-import 'package:chatapp/Screen/CallScreen.dart';
-import 'package:chatapp/provider/call_provider.dart';
-import 'package:chatapp/provider/user_provider.dart';
+import 'package:rela/Screen/CallScreen.dart';
+import 'package:rela/model/notification.dart';
+import 'package:rela/provider/call_provider.dart';
+import 'package:rela/provider/notification_provider.dart';
+import 'package:rela/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:chatapp/model/message.dart';
-import 'package:chatapp/provider/convervasion_provider.dart';
+import 'package:rela/model/message.dart';
+import 'package:rela/provider/convervasion_provider.dart';
 
 class Conversation extends StatefulWidget {
   final int convervationid;
@@ -84,7 +86,7 @@ class _ConversationState extends State<Conversation> {
     final messages = context.watch<ConversationProvider>().messages;
     final room = context.watch<ConversationProvider>().room;
     final call=context.watch<CallProvider>();
-
+    final noti=context.read<NotificationProvider>();
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 6, 91, 238),
       appBar: AppBar(
@@ -170,7 +172,7 @@ class _ConversationState extends State<Conversation> {
                                       child: Hero(
                                         tag: msg.id,
                                         child: Image.network(
-                                          "http://192.168.1.13:8080" +
+                                          "http://192.168.195.183:8080" +
                                               msg.fileUrl!,
                                           fit: BoxFit.cover,
                                         ),
@@ -181,7 +183,7 @@ class _ConversationState extends State<Conversation> {
                                 child: Hero(
                                   tag: msg.id,
                                   child: Image.network(
-                                    "http://192.168.1.13:8080" + msg.fileUrl!,
+                                    "http://192.168.195.183:8080" + msg.fileUrl!,
                                     width: 200,
                                     height: 200,
                                     fit: BoxFit.cover,
@@ -291,6 +293,8 @@ class _ConversationState extends State<Conversation> {
                       );
                       debugPrint("Sending message: ${msg.toJson()}");
                       provider.sendMessage(msg);
+                      NotiDTO notification=NotiDTO(createdAt: 0, receiverId: friendId, senderId: SenderInfo(id: userId, name: "", avatarUrl: ""), status: false, title: "", type: "message");
+                      noti.sendNotification(notification);
                       messageController.clear();
                       _scrollToBottom();
                       }

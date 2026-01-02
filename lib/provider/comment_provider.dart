@@ -1,6 +1,6 @@
-import 'package:chatapp/Service/comment_service.dart';
-import 'package:chatapp/model/comment.dart';
-import 'package:chatapp/model/message.dart';
+import 'package:rela/Service/comment_service.dart';
+import 'package:rela/model/comment.dart';
+import 'package:rela/model/message.dart';
 import 'package:flutter/material.dart';
 
 class CommentProvider extends ChangeNotifier {

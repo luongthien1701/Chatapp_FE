@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:chatapp/Service/profile_service.dart';
-import 'package:chatapp/Service/upload_service.dart';
-import 'package:chatapp/model/message.dart';
+import 'package:rela/Service/profile_service.dart';
+import 'package:rela/Service/upload_service.dart';
+import 'package:rela/model/message.dart';
 import 'package:flutter/material.dart';
 
 class UserProvider extends ChangeNotifier {

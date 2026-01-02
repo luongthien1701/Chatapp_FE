@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:chatapp/model/userdto.dart';
-import 'package:chatapp/Service/profile_service.dart';
-import 'package:chatapp/Service/friend_service.dart';
-import 'package:chatapp/Service/chatroom_service.dart';
+import 'package:rela/model/userdto.dart';
+import 'package:rela/Service/profile_service.dart';
+import 'package:rela/Service/friend_service.dart';
+import 'package:rela/Service/chatroom_service.dart';
 
 class AccountProvider extends ChangeNotifier {
   final ProfileService _profileService = ProfileService();

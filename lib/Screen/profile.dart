@@ -1,9 +1,9 @@
-import 'package:chatapp/Screen/account.dart';
-import 'package:chatapp/model/message.dart';
+import 'package:rela/Screen/account.dart';
+import 'package:rela/model/message.dart';
 import 'package:provider/provider.dart';
-import 'package:chatapp/Screen/login.dart';
-import 'package:chatapp/Service/profile_service.dart';
-import 'package:chatapp/provider/user_provider.dart';
+import 'package:rela/Screen/login.dart';
+import 'package:rela/Service/profile_service.dart';
+import 'package:rela/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 
 class Profile extends StatefulWidget {

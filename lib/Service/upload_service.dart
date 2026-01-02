@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:chatapp/Service/ip.dart';
+import 'package:rela/Service/ip.dart';
 import 'package:http/http.dart' as http;
 
 class UploadService {

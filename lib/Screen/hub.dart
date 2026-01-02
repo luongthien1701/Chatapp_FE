@@ -1,12 +1,14 @@
 import 'dart:convert';
 
-import 'package:chatapp/Screen/CallScreen.dart';
-import 'package:chatapp/Screen/IncommingCall.dart';
-import 'package:chatapp/Screen/newfeed.dart';
-import 'package:chatapp/Service/socket_service.dart';
-import 'package:chatapp/provider/call_provider.dart';
-import 'package:chatapp/provider/newsfeed_provider.dart';
-import 'package:chatapp/provider/user_provider.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:rela/Screen/CallScreen.dart';
+import 'package:rela/Screen/IncommingCall.dart';
+import 'package:rela/Screen/newfeed.dart';
+import 'package:rela/Service/notification_service.dart';
+import 'package:rela/Service/socket_service.dart';
+import 'package:rela/provider/call_provider.dart';
+import 'package:rela/provider/newsfeed_provider.dart';
+import 'package:rela/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../provider/notification_provider.dart';
@@ -25,14 +27,14 @@ class Hub extends StatefulWidget {
 
 class _HubState extends State<Hub> {
   int _index = 0;
-  
+
   String _state = "News Feed";
   late List<Widget> _pages;
 
   @override
   void initState() {
     super.initState();
-
+    _initFCM();
     final userId = context.read<UserProvider>().userId;
     final socket = SocketService();
 
@@ -109,6 +111,16 @@ class _HubState extends State<Hub> {
     );
   }
 
+  Future<void> _initFCM() async {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    String? token = await messaging.getToken();
+    print(token);
+    final userId = context.read<UserProvider>().userId;
+    if (token != null) {
+      await NotificationService.sendTokenToServer(userId, token);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final noti = context.watch<NotificationProvider>();
@@ -161,11 +173,24 @@ class _HubState extends State<Hub> {
             ),
         ],
       ),
-
-      body: Stack(children: [
-        IndexedStack(index: _index, children: _pages),
-        ]),
-
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 200),
+        transitionBuilder: (child, animation) {
+          return SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0, 0),
+              end: Offset.zero,
+            ).animate(
+              CurvedAnimation(parent: animation, curve: Curves.easeOut),
+            ),
+            child: FadeTransition(
+              opacity: animation,
+              child: child,
+            ),
+          );
+        },
+        child: _pages[_index],
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
         height: 70,
@@ -174,11 +199,11 @@ class _HubState extends State<Hub> {
         onDestinationSelected: (i) async {
           setState(() {
             _index = i;
-            _state = ["News Feed","Messages", "Friends", "Profile" ][i];
+            _state = ["News Feed", "Messages", "Friends", "Profile"][i];
           });
-           if (i == 0) {
-          final userId = context.read<UserProvider>().userId;
-          await context.read<NewsfeedProvider>().fetchNewsfeed(userId);
+          if (i == 0) {
+            final userId = context.read<UserProvider>().userId;
+            await context.read<NewsfeedProvider>().fetchNewsfeed(userId);
           }
         },
         destinations: const [
@@ -202,7 +227,6 @@ class _HubState extends State<Hub> {
             selectedIcon: Icon(Icons.person, color: Colors.white),
             label: "Profile",
           ),
-          
         ],
       ),
     );

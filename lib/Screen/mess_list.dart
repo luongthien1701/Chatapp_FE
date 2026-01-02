@@ -1,4 +1,4 @@
-import 'package:chatapp/provider/user_provider.dart';
+import 'package:rela/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../provider/mess_list_provider.dart';

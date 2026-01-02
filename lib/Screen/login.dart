@@ -1,11 +1,11 @@
-import 'package:chatapp/Screen/hub.dart';
-import 'package:chatapp/model/message.dart';
-import 'package:chatapp/model/userrequest.dart';
-import 'package:chatapp/provider/user_provider.dart';
+import 'package:rela/Screen/hub.dart';
+import 'package:rela/model/message.dart';
+import 'package:rela/model/userrequest.dart';
+import 'package:rela/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'signup.dart';
 import 'package:provider/provider.dart';
-import 'package:chatapp/Service/auth_service.dart';
+import 'package:rela/Service/auth_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});

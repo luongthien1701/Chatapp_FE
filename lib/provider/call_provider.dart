@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:chatapp/Service/call_service.dart';
-import 'package:chatapp/Service/profile_service.dart';
-import 'package:chatapp/Service/socket_service.dart';
-import 'package:chatapp/model/message.dart';
+import 'package:rela/Service/call_service.dart';
+import 'package:rela/Service/profile_service.dart';
+import 'package:rela/Service/socket_service.dart';
+import 'package:rela/model/message.dart';
 
 class CallProvider extends ChangeNotifier {
   final CallService callService = CallService();

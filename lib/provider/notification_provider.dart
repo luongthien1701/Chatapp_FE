@@ -1,4 +1,6 @@
-import 'package:chatapp/model/message.dart';
+import 'package:rela/Service/notification_service.dart';
+import 'package:rela/Service/socket_service.dart';
+import 'package:rela/model/message.dart';
 import 'package:flutter/foundation.dart';
 import '../model/notification.dart';
 
@@ -10,7 +12,9 @@ class NotificationProvider extends ChangeNotifier {
     notifications = initNoti;
     notifyListeners();
   }
-
+  Future<void> sendToken(int userId, String token) async {
+    await NotificationService.sendTokenToServer(userId, token);
+  }
   /// Nhận event từ Hub
   void onReceive(Map<String, dynamic> msg) {
     if (msg['event'] != 'notification') return;
@@ -28,13 +32,17 @@ class NotificationProvider extends ChangeNotifier {
         receiverId: payload['receiver'],
         status: payload['status'] ?? false,
         createdAt: payload['createdAt'],
+        type: payload['type'] ?? '',
       ),
     );
 
     hasNew = true;
     notifyListeners();
   }
-
+  void sendNotification(NotiDTO noti) {
+    final payload = {"event": "notification", "data": noti.toJson()};
+    SocketService().sendMessage(payload);
+  }
   void clearNewFlag() {
     hasNew = false;
     notifyListeners();

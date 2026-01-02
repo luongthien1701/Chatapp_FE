@@ -1,8 +1,8 @@
 import 'dart:convert';
-import 'package:chatapp/Service/ip.dart';
-import 'package:chatapp/model/image.dart';
-import 'package:chatapp/model/message.dart';
-import 'package:chatapp/model/newfeed.dart';
+import 'package:rela/Service/ip.dart';
+import 'package:rela/model/image.dart';
+import 'package:rela/model/message.dart';
+import 'package:rela/model/newfeed.dart';
 import 'package:http/http.dart' as http;
 class NewsfeedService {
   String baseUrl = Ip().getIp();

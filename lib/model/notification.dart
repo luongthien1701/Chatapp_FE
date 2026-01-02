@@ -6,12 +6,14 @@ class NotiDTO {
   final int createdAt;
   final SenderInfo senderId;
   final int receiverId;
+  final String type;
   NotiDTO({
     required this.title,
     required this.status,
     required this.createdAt,
     required this.senderId,
     required this.receiverId,
+    required this.type,
   });
 
   factory NotiDTO.fromJson(Map<String, dynamic> json) {
@@ -21,6 +23,7 @@ class NotiDTO {
       createdAt: json['createdAt'],
       senderId: SenderInfo.fromJson(json['sender']),
       receiverId: json['receiver'],
+      type: json['type'],
     );
   }
   Map<String, dynamic> toJson() {
@@ -34,6 +37,7 @@ class NotiDTO {
         'avatarUrl': senderId.avatarUrl,
       },
       'receiver': receiverId,
+      'type':type,
     };
   }
 }

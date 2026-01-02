@@ -1,5 +1,7 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:rela/Screen/CallScreen.dart';
-import 'package:rela/Screen/IncommingCall.dart';
+import 'package:rela/Service/notification_service.dart';
 import 'package:rela/provider/account_provider.dart';
 import 'package:rela/provider/call_provider.dart';
 import 'package:rela/provider/comment_provider.dart';
@@ -15,7 +17,23 @@ import 'package:rela/provider/contact_provider.dart';
 
 import 'Screen/login.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  await FirebaseMessaging.instance.subscribeToTopic("test");
+  await requestNotificationPermission();
+  await NotificationService.init();
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    RemoteNotification? notification = message.notification;
+    AndroidNotification? android = message.notification?.android;
+    if (notification != null && android != null) {
+      NotificationService.showNotification(
+        notification.hashCode,
+        notification.title ?? '',
+        notification.body ?? '',
+      );
+    }
+  });
   runApp(
     MultiProvider(
       providers: [
@@ -34,9 +52,16 @@ void main() {
     ),
   );
 }
+Future<void> requestNotificationPermission() async {
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+  NotificationSettings settings=await messaging.requestPermission(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
+}
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -44,21 +69,16 @@ class MyApp extends StatelessWidget {
       title: 'Chat App',
       theme: ThemeData(primarySwatch: Colors.blue),
       
-      // 🔥 MAGIC IS HERE: builder giúp CallScreen luôn nằm trên cùng mọi màn hình
       builder: (context, child) {
         return Stack(
           children: [
-            // Lớp ứng dụng bình thường (Hub, Conversation...)
             if (child != null) child,
-            
-            // Lớp màn hình gọi (Global Overlay)
-            // Nó sẽ nằm đè lên trên tất cả, bất kể bạn đang ở màn hình nào
             const CallScreen(), 
           ],
         );
       },
       
-      home: const LoginPage(), // Hoặc Hub()
+      home: const LoginPage(), 
     );
   }
 }

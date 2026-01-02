@@ -1,6 +1,6 @@
-import 'package:chatapp/Screen/account.dart';
-import 'package:chatapp/provider/search_provider.dart';
-import 'package:chatapp/provider/user_provider.dart';
+import 'package:rela/Screen/account.dart';
+import 'package:rela/provider/search_provider.dart';
+import 'package:rela/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../model/search.dart';

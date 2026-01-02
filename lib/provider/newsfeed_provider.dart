@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:chatapp/Service/newsfeed_service.dart';
-import 'package:chatapp/Service/upload_service.dart';
-import 'package:chatapp/model/image.dart';
-import 'package:chatapp/model/message.dart';
-import 'package:chatapp/model/newfeed.dart';
+import 'package:rela/Service/newsfeed_service.dart';
+import 'package:rela/Service/upload_service.dart';
+import 'package:rela/model/image.dart';
+import 'package:rela/model/message.dart';
+import 'package:rela/model/newfeed.dart';
 import 'package:flutter/material.dart';
 
 class NewsfeedProvider extends ChangeNotifier {

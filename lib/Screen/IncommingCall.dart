@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:chatapp/provider/call_provider.dart';
-import 'package:chatapp/provider/user_provider.dart';
+import 'package:rela/provider/call_provider.dart';
+import 'package:rela/provider/user_provider.dart';
 
 class InCommingCall extends StatelessWidget {
   const InCommingCall({super.key});
@@ -19,7 +19,7 @@ class InCommingCall extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 50,
-              backgroundImage: NetworkImage("http://192.168.1.13:8080${call.info.avatarUrl}"),
+              backgroundImage: NetworkImage("http://192.168.195.183:8080${call.info.avatarUrl}"),
             ),
             const SizedBox(height: 20),
             Text(

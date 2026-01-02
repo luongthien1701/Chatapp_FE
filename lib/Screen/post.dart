@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:chatapp/model/message.dart';
-import 'package:chatapp/provider/newsfeed_provider.dart';
-import 'package:chatapp/provider/user_provider.dart';
+import 'package:rela/model/message.dart';
+import 'package:rela/provider/newsfeed_provider.dart';
+import 'package:rela/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';

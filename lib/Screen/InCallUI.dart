@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
-import 'package:chatapp/provider/call_provider.dart';
+import 'package:rela/provider/call_provider.dart';
 
 class InCallUI extends StatelessWidget {
   const InCallUI({super.key});
