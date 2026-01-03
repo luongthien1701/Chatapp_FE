@@ -11,6 +11,7 @@ class SocketService {
 
   int? _userId;
   int _retryCount = 0;
+  bool isLogout=false;
 
   Stream<String> get messages => _controller.stream;
   bool get _isConnected => _channel != null && _channel!.closeCode == null;
@@ -19,6 +20,7 @@ class SocketService {
     if (_isConnected) return;
 
     _userId = userId;
+    isLogout=false;
     print('🔌 Connecting as user $userId');
 
     _channel = WebSocketChannel.connect(
@@ -49,6 +51,7 @@ class SocketService {
   }
 
   Future<void> reconnect(int userId) async {
+    if (isLogout) return;
     if (_retryCount >= 5) return;
     _retryCount++;
     await Future.delayed(Duration(seconds: 2 * _retryCount));
@@ -64,6 +67,7 @@ class SocketService {
   }
 
   void disconnect() {
+    isLogout = true;
     _channel?.sink.close();
     _channel = null;
     _retryCount = 0;

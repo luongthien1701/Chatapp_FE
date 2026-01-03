@@ -7,6 +7,7 @@ import 'package:rela/provider/call_provider.dart';
 import 'package:rela/provider/comment_provider.dart';
 import 'package:rela/provider/newsfeed_provider.dart';
 import 'package:rela/provider/search_provider.dart';
+import 'package:rela/provider/theme_provider.dart';
 import 'package:rela/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart'; 
@@ -47,6 +48,7 @@ void main() async {
         ChangeNotifierProvider(create:  (_) => NewsfeedProvider()),
         ChangeNotifierProvider(create:  (_) => CommentProvider()),
         ChangeNotifierProvider(create:  (_) => CallProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
       child: const MyApp(),
     ),

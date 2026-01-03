@@ -1,5 +1,6 @@
 import 'package:rela/Screen/account.dart';
 import 'package:rela/provider/contact_provider.dart';
+import 'package:rela/provider/theme_provider.dart';
 import 'package:rela/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -13,10 +14,12 @@ class Contact extends StatefulWidget {
 
 class _Contact extends State<Contact> {
   late final int userId;
+  late Color color;
   @override
   void initState() {
     super.initState();
     userId=context.read<UserProvider>().userId;
+    color=context.read<ThemeProvider>().lightTheme;
     Future.microtask(() =>
         context.read<FriendProvider>().fetchListFriend(userId));
   }
@@ -27,7 +30,7 @@ class _Contact extends State<Contact> {
     final list = provider.list;
 
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 152, 209, 255),
+      backgroundColor: color,
       body: provider.isLoading
           ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
@@ -40,9 +43,14 @@ class _Contact extends State<Contact> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => Account(
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) => Account(
                           friendId: list[index].friendId,
+                        ),
+                        transitionDuration: const Duration(milliseconds: 500),
+                        transitionsBuilder: (context, animation, secondaryAnimation, child) => FadeTransition(
+                          opacity: animation,
+                          child: child,
                         ),
                       ),
                     );

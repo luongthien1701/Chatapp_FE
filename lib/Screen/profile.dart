@@ -3,8 +3,10 @@ import 'package:rela/model/message.dart';
 import 'package:provider/provider.dart';
 import 'package:rela/Screen/login.dart';
 import 'package:rela/Service/profile_service.dart';
+import 'package:rela/provider/theme_provider.dart';
 import 'package:rela/provider/user_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:rela/Service/socket_service.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -14,38 +16,45 @@ class Profile extends StatefulWidget {
 }
 
 class _Profile extends State<Profile> {
-  String name="";
-  ProfileService profileService =ProfileService();
+  String name = "";
+  ProfileService profileService = ProfileService();
   late final int _userId;
+  late Color color;
   @override
-  void initState()
-  {
+  void initState() {
     super.initState();
+    color = context.read<ThemeProvider>().lightTheme;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-    _userId=context.read<UserProvider>().userId;
-    loaddata();
+      _userId = context.read<UserProvider>().userId;
+      loaddata();
     });
   }
-  void loaddata() async
-  {
-    SenderInfo user=await profileService.getProfile(_userId);
-    name=user.name;
+
+  void loaddata() async {
+    SenderInfo user = await profileService.getProfile(_userId);
+    name = user.name;
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 152, 209, 255),
-       body: Column(
+      backgroundColor: color,
+      body: Column(
         children: [
           SizedBox(
             child: Column(
               children: [
-                SizedBox(height: 10,),
-                CircleAvatar(
-                  radius: 30,
-                  backgroundImage: AssetImage("assets/image/avatar_default.png"),
+                const SizedBox(
+                  height: 10,
                 ),
-                SizedBox(height: 10,),
+                const CircleAvatar(
+                  radius: 30,
+                  backgroundImage:
+                      AssetImage("assets/image/avatar_default.png"),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
                 Text(name),
               ],
             ),
@@ -53,41 +62,92 @@ class _Profile extends State<Profile> {
           Expanded(
             child: Column(
               children: [
-                SizedBox(height: 50,),
+                const SizedBox(
+                  height: 50,
+                ),
                 GestureDetector(
                   onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => Account(friendId: 0)));
+                    Navigator.push(
+                        context,
+                        PageRouteBuilder(
+                          transitionDuration: const Duration(milliseconds: 500),
+                          pageBuilder: (_, __, ___) =>
+                              const Account(friendId: 0),
+                          transitionsBuilder:
+                              (context, animation, secondaryAnimation, child) =>
+                                  FadeTransition(
+                            opacity: animation,
+                            child: child,
+                          ),
+                        ));
                   },
-                  child: Row(
+                  child: const Row(
                     children: [
-                      IconButton(onPressed: null, icon: Icon(Icons.person_2_rounded,size: 20,)),
+                      IconButton(
+                          onPressed: null,
+                          icon: Icon(
+                            Icons.person_2_rounded,
+                            size: 20,
+                            color: Colors.black,
+                          )),
                       Text("Accounts"),
-                    ],),
+                    ],
+                  ),
                 ),
-                Divider(color: Colors.black26,thickness: 2,height: 5,),
-                SizedBox(height: 20,),
+                const Divider(
+                  color: Colors.black26,
+                  thickness: 2,
+                  height: 5,
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
                 Row(
                   children: [
-                    IconButton(onPressed: null, icon: Icon(Icons.sunny,size: 20,)),
-                    Text("Theme")
+                    IconButton(
+                        onPressed: () {
+                          context.read<ThemeProvider>().changeTheme();
+                        },
+                        icon: const Icon(
+                          Icons.sunny,
+                          size: 20,
+                          color: Colors.black,
+                        )),
+                    const Text("Theme")
                   ],
                 ),
-                Divider(color: Colors.black26,thickness: 2,height: 5,),
-                SizedBox(height: 20,),
+                const Divider(
+                  color: Colors.black26,
+                  thickness: 2,
+                  height: 5,
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
                 Row(
                   children: [
-                    IconButton(onPressed: ()
-                    {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage(),));
-                    }, icon: Icon(Icons.logout,size: 20,)),
-                    Text("Log Out")
+                    IconButton(
+                        onPressed: () {
+                          SocketService().disconnect();
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const LoginPage(),
+                              ));
+                        },
+                        icon: const Icon(
+                          Icons.logout,
+                          size: 20,
+                          color: Colors.black,
+                        )),
+                    const Text("Log Out")
                   ],
                 ),
               ],
             ),
           )
         ],
-       ),
+      ),
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:rela/provider/theme_provider.dart';
 import 'package:rela/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -12,9 +13,11 @@ class MessList extends StatefulWidget {
 }
 
 class _MessList extends State<MessList> {
+  late Color color;
   @override
   void initState() {
     super.initState();
+    color=context.read<ThemeProvider>().lightTheme;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final provider = context.read<ChatroomProvider>();
       final userId = context.read<UserProvider>().userId;
@@ -26,7 +29,7 @@ class _MessList extends State<MessList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 152, 209, 255),
+      backgroundColor: color,
       body: Consumer<ChatroomProvider>(
         builder: (context, provider, _) {
           final rooms = provider.rooms;
@@ -67,8 +70,13 @@ class _MessList extends State<MessList> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (_) => Conversation(convervationid: room.id),
+                    PageRouteBuilder(
+                      pageBuilder: (_, __, ___) => Conversation(convervationid: room.id),
+                      transitionDuration: const Duration(milliseconds: 500),
+                      transitionsBuilder: (context, animation, secondaryAnimation, child) => FadeTransition(
+                        opacity: animation,
+                        child: child,
+                      ),
                     ),
                   );
                 },

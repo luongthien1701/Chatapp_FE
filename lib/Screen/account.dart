@@ -1,9 +1,11 @@
 import 'dart:io';
+import 'package:rela/Screen/conversation.dart';
 import 'package:rela/model/message.dart';
 import 'package:rela/model/newfeed.dart';
 import 'package:rela/provider/account_provider.dart';
 import 'package:rela/provider/comment_provider.dart';
 import 'package:rela/provider/newsfeed_provider.dart';
+import 'package:rela/provider/theme_provider.dart';
 import 'package:rela/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -12,7 +14,7 @@ import 'package:provider/provider.dart';
 enum AccountAction { none, updateInfo, changePassword }
 
 class Account extends StatefulWidget {
-  final int friendId; // 0 = profile của mình
+  final int friendId;
   const Account({super.key, required this.friendId});
 
   @override
@@ -43,13 +45,13 @@ class _AccountState extends State<Account> {
       userId = context.read<UserProvider>().userId;
       name = context.read<UserProvider>().getDisplayname;
       await context.read<AccountProvider>().loadProfile(
-        userId,
-        widget.friendId,
-      );
+            userId,
+            widget.friendId,
+          );
 
       await context.read<NewsfeedProvider>().fetchNewsfeedByUserId(
-        widget.friendId == 0 ? userId : widget.friendId,
-      );
+            widget.friendId == 0 ? userId : widget.friendId,
+          );
 
       final profile = context.read<AccountProvider>().profile;
       _displayNameCtrl.text = profile?.displayName ?? "";
@@ -84,20 +86,40 @@ class _AccountState extends State<Account> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Profile")),
+      backgroundColor: context.watch<ThemeProvider>().currentTheme,
+      appBar: AppBar(
+        title: const Text("Profile", style: TextStyle(color: Colors.white)),
+        backgroundColor: context.watch<ThemeProvider>().currentTheme,
+        actions: const [
+          IconButton(
+            onPressed: null,
+            icon: Icon(Icons.more_horiz, color: Colors.white),
+          ),
+        ],
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
       body: CustomScrollView(
         slivers: [
-          /// ===== PROFILE HEADER =====
-          SliverToBoxAdapter(child: _buildProfileHeader(accountProvider)),
-
-          /// ===== POSTS =====
+          SliverToBoxAdapter(
+              child: accountProvider.isMe
+                  ? _buildProfileHeader(accountProvider)
+                  : _buildFriendProfile(accountProvider, widget.friendId)),
           Consumer<NewsfeedProvider>(
             builder: (_, feedProvider, __) {
               final posts = feedProvider.newsfeed;
 
               if (posts.isEmpty) {
                 return const SliverFillRemaining(
-                  child: Center(child: Text("Chưa có bài viết")),
+                  child: Center(
+                      child: Text(
+                    "Chưa có bài viết",
+                    style: TextStyle(color: Colors.white),
+                  )),
                 );
               }
 
@@ -132,7 +154,7 @@ class _AccountState extends State<Account> {
             backgroundImage: _image != null
                 ? FileImage(_image!)
                 : const AssetImage("assets/image/avatar_default.png")
-                      as ImageProvider,
+                    as ImageProvider,
           ),
         ),
 
@@ -140,7 +162,8 @@ class _AccountState extends State<Account> {
 
         Text(
           provider.displayname,
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+              fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
         ),
 
         const SizedBox(height: 12),
@@ -168,13 +191,78 @@ class _AccountState extends State<Account> {
     );
   }
 
+  Widget _buildFriendProfile(AccountProvider provider, int friendId) {
+    return Column(
+      children: [
+        const SizedBox(height: 20),
+        CircleAvatar(
+          radius: 45,
+          backgroundImage: _image != null
+              ? FileImage(_image!)
+              : const AssetImage("assets/image/avatar_default.png")
+                  as ImageProvider,
+        ),
+        const SizedBox(height: 10),
+        Text(
+          provider.displayname,
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            provider.status != "ACCEPTED"
+                ? ElevatedButton(
+                    onPressed: () {
+                      provider.addFriend(userId, friendId);
+                    },
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white),
+                    child: const Text("Add Friend"))
+                : ElevatedButton(
+                    onPressed: () {
+                      provider.deleteFriend(userId, friendId);
+                    },
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white),
+                    child: const Text("Remove Friend")),
+            const SizedBox(width: 10),
+            ElevatedButton(
+              onPressed: () async {
+                int roomId = await context
+                    .read<AccountProvider>()
+                    .findRoom(userId, friendId);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => Conversation(convervationid: roomId),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue, foregroundColor: Colors.white),
+              child: const Text("Message"),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          child: _buildActionForm(),
+        ),
+        const Divider(thickness: 2),
+      ],
+    );
+  }
+
   Widget _actionButton(String title, AccountAction action) {
     return ElevatedButton(
       onPressed: () {
         setState(() {
-          _currentAction = _currentAction == action
-              ? AccountAction.none
-              : action;
+          _currentAction =
+              _currentAction == action ? AccountAction.none : action;
         });
       },
       child: Text(title),
@@ -298,8 +386,8 @@ class _AccountState extends State<Account> {
                             TextButton(
                               onPressed: () {
                                 context.read<NewsfeedProvider>().deletePost(
-                                  post.id,
-                                );
+                                      post.id,
+                                    );
                                 Navigator.pop(context);
                               },
                               child: const Text("Xóa"),
@@ -315,9 +403,7 @@ class _AccountState extends State<Account> {
             ),
             const SizedBox(height: 10),
             Text(post.content),
-
             const SizedBox(height: 12),
-
             if (post.imageUrl != null && post.imageUrl!.isNotEmpty)
               Column(
                 children: post.imageUrl!.map((imageUrl) {
@@ -350,7 +436,6 @@ class _AccountState extends State<Account> {
                   ),
                 ),
                 Text(post.favorite.toString()),
-
                 IconButton(
                   onPressed: () => _openCommentDialog(context, postId: post.id),
                   icon: const Icon(Icons.comment),
@@ -389,7 +474,6 @@ class _AccountState extends State<Account> {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
-
                 Expanded(
                   child: Consumer<CommentProvider>(
                     builder: (_, provider, __) {
@@ -440,8 +524,8 @@ class _AccountState extends State<Account> {
                             commentProvider.addComment(postId, sender, content);
                             commentController.clear();
                             context.read<NewsfeedProvider>().increaseComment(
-                              postId,
-                            );
+                                  postId,
+                                );
                           }
                         },
                       ),

@@ -1,13 +1,13 @@
 import 'dart:convert';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:rela/Screen/CallScreen.dart';
-import 'package:rela/Screen/IncommingCall.dart';
 import 'package:rela/Screen/newfeed.dart';
 import 'package:rela/Service/notification_service.dart';
 import 'package:rela/Service/socket_service.dart';
 import 'package:rela/provider/call_provider.dart';
+import 'package:rela/provider/contact_provider.dart';
 import 'package:rela/provider/newsfeed_provider.dart';
+import 'package:rela/provider/theme_provider.dart';
 import 'package:rela/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -30,14 +30,13 @@ class _HubState extends State<Hub> {
 
   String _state = "News Feed";
   late List<Widget> _pages;
-
+  late int userId;
   @override
   void initState() {
     super.initState();
+    userId = context.read<UserProvider>().userId;
     _initFCM();
-    final userId = context.read<UserProvider>().userId;
     final socket = SocketService();
-
     socket.connect(userId);
 
     socket.messages.listen((data) {
@@ -65,6 +64,12 @@ class _HubState extends State<Hub> {
       Contact(),
       Profile(),
     ];
+  }
+
+  @override
+  void dispose() {
+    SocketService().disconnect();
+    super.dispose();
   }
 
   void _showNotificationsMenu(BuildContext context, TapDownDetails details) {
@@ -114,8 +119,6 @@ class _HubState extends State<Hub> {
   Future<void> _initFCM() async {
     FirebaseMessaging messaging = FirebaseMessaging.instance;
     String? token = await messaging.getToken();
-    print(token);
-    final userId = context.read<UserProvider>().userId;
     if (token != null) {
       await NotificationService.sendTokenToServer(userId, token);
     }
@@ -123,13 +126,12 @@ class _HubState extends State<Hub> {
 
   @override
   Widget build(BuildContext context) {
-    final noti = context.watch<NotificationProvider>();
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 27, 92, 203),
+      backgroundColor: context.watch<ThemeProvider>().currentTheme,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Text(_state, style: const TextStyle(color: Colors.white)),
-        backgroundColor: const Color.fromARGB(255, 27, 92, 203),
+        backgroundColor: context.watch<ThemeProvider>().currentTheme,
         actions: [
           if (_index != 0 && _index != 3)
             Row(
@@ -138,8 +140,13 @@ class _HubState extends State<Hub> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => Check(),
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) => const Check(),
+                        transitionDuration: const Duration(milliseconds: 500),
+                        transitionsBuilder: (context, animation, secondaryAnimation, child) => FadeTransition(
+                          opacity: animation,
+                          child: child,
+                        ),
                       ),
                     );
                   },
@@ -152,7 +159,7 @@ class _HubState extends State<Hub> {
                     child: Stack(
                       children: [
                         const Icon(Icons.notifications, color: Colors.white),
-                        if (noti.hasNew)
+                        if (context.watch<NotificationProvider>().hasNew)
                           Positioned(
                             right: 0,
                             top: 0,
@@ -194,16 +201,22 @@ class _HubState extends State<Hub> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
         height: 70,
-        backgroundColor: const Color.fromARGB(255, 27, 123, 202),
-        indicatorColor: Colors.white.withOpacity(0.3),
-        onDestinationSelected: (i) async {
+        backgroundColor: context.watch<ThemeProvider>().currentTheme,
+        indicatorColor: Colors.white.withValues(alpha: 0.3),
+        labelTextStyle: WidgetStateProperty.all(
+          const TextStyle(
+              fontSize: 14, fontWeight: FontWeight.w500, color: Colors.white),
+        ),
+        onDestinationSelected: (i) {
           setState(() {
             _index = i;
             _state = ["News Feed", "Messages", "Friends", "Profile"][i];
           });
           if (i == 0) {
-            final userId = context.read<UserProvider>().userId;
-            await context.read<NewsfeedProvider>().fetchNewsfeed(userId);
+            context.read<NewsfeedProvider>().fetchNewsfeed(userId);
+          }
+          if (i == 2) {
+            context.read<FriendProvider>().fetchListFriend(userId);
           }
         },
         destinations: const [

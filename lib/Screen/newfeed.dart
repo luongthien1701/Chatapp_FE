@@ -4,6 +4,7 @@ import 'package:rela/model/notification.dart';
 import 'package:rela/provider/comment_provider.dart';
 import 'package:rela/provider/newsfeed_provider.dart';
 import 'package:rela/provider/notification_provider.dart';
+import 'package:rela/provider/theme_provider.dart';
 import 'package:rela/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -20,9 +21,11 @@ class _NewfeedState extends State<Newfeed> {
   List<Newfeed> posts = [];
   late final int userId;
   late String name = '';
+  late Color color;
   @override
   void initState() {
     super.initState();
+    color = context.read<ThemeProvider>().currentTheme;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final provider = Provider.of<NewsfeedProvider>(context, listen: false);
       userId = context.read<UserProvider>().userId;
@@ -62,7 +65,7 @@ class _NewfeedState extends State<Newfeed> {
             slivers: [
               SliverAppBar(
                 automaticallyImplyLeading: false,
-                backgroundColor: Colors.blueAccent,
+                backgroundColor: color,
                 expandedHeight: 30,
                 pinned: false,
                 flexibleSpace: SafeArea(
