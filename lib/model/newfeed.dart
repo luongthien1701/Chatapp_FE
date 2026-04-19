@@ -1,3 +1,4 @@
+import 'package:rela/Service/ip.dart';
 import 'package:rela/model/message.dart';
 
 class NewfeedDTO {
@@ -20,6 +21,7 @@ class NewfeedDTO {
     required this.isFavorite,
   });
   factory NewfeedDTO.fromJson(Map<String, dynamic> json) {
+    String ip = Ip().ip;
     final images = json['image'];
     return NewfeedDTO(
       id: json['id'],
@@ -28,8 +30,8 @@ class NewfeedDTO {
       imageUrl: images == null
           ? null
           : (images is List
-                ? images.map((e) => "http://192.168.195.183:8080$e").toList()
-                : ["http://192.168.195.183:8080$images"]),
+              ? images.map((e) => "http://$ip:8080$e").toList()
+              : ["http://$ip:8080$images"]),
       createdAt: json['createAt'],
       favorite: json['favorite'],
       comments: json['comments'],

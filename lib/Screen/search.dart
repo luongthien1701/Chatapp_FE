@@ -1,4 +1,6 @@
 import 'package:rela/Screen/account.dart';
+import 'package:rela/model/userdto.dart';
+import 'package:rela/provider/locate_provider.dart';
 import 'package:rela/provider/search_provider.dart';
 import 'package:rela/provider/user_provider.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +8,9 @@ import 'package:provider/provider.dart';
 import '../model/search.dart';
 
 class Check extends StatefulWidget {
-  const Check({super.key, });
+  const Check({
+    super.key,
+  });
 
   @override
   State<Check> createState() => _Check();
@@ -16,15 +20,22 @@ class _Check extends State<Check> {
   int _index = 0;
   Color color = Colors.black;
   final TextEditingController like = TextEditingController();
+  late final int userId;
+  @override
+  void initState() {
+    super.initState();
+    userId = context.read<UserProvider>().userId;
+  }
 
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<SearchProvider>();
-    final userId=context.read<UserProvider>().userId;
+    final nearbyUsers = context.watch<LocateProvider>().nearbyUsers;
     final pages = <Widget>[
       _ContactPage(userId: userId, userlist: provider.userlist),
       _MessagePage(messlist: provider.messlist),
       _RoomPage(roomlist: provider.roomlist),
+      _UserNearPage(listuser: nearbyUsers)
     ];
 
     return Scaffold(
@@ -55,10 +66,15 @@ class _Check extends State<Check> {
                     margin: const EdgeInsets.symmetric(horizontal: 6),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                        color: _index==0? const Color.fromARGB(255, 87, 167, 233):Colors.transparent,
+                        color: _index == 0
+                            ? const Color.fromARGB(255, 87, 167, 233)
+                            : Colors.transparent,
                         border: Border.all(width: 1),
-                        borderRadius: const BorderRadius.all(Radius.circular(8))),
-                    child: Text("Contact",style: TextStyle(color: _index==0?Colors.white:Colors.black)),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(8))),
+                    child: Text("Contact",
+                        style: TextStyle(
+                            color: _index == 0 ? Colors.white : Colors.black)),
                   ),
                 ),
               ),
@@ -66,14 +82,19 @@ class _Check extends State<Check> {
                 child: GestureDetector(
                   onTap: () => setState(() => _index = 1),
                   child: Container(
-                    
                     margin: const EdgeInsets.symmetric(horizontal: 6),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                        color: _index==1? const Color.fromARGB(255, 87, 167, 233):Colors.transparent,
+                        color: _index == 1
+                            ? const Color.fromARGB(255, 87, 167, 233)
+                            : Colors.transparent,
                         border: Border.all(width: 1),
-                        borderRadius: const BorderRadius.all(Radius.circular(8))),
-                    child: Text("Messages",style: TextStyle(color: _index==1?Colors.white:Colors.black, )),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(8))),
+                    child: Text("Messages",
+                        style: TextStyle(
+                          color: _index == 1 ? Colors.white : Colors.black,
+                        )),
                   ),
                 ),
               ),
@@ -84,10 +105,37 @@ class _Check extends State<Check> {
                     margin: const EdgeInsets.symmetric(horizontal: 6),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                        color: _index==2? const Color.fromARGB(255, 87, 167, 233):Colors.transparent,
+                        color: _index == 2
+                            ? const Color.fromARGB(255, 87, 167, 233)
+                            : Colors.transparent,
                         border: Border.all(width: 1),
-                        borderRadius: const BorderRadius.all(Radius.circular(8))),
-                    child: Text("Chat Room",style: TextStyle(color: _index==2?Colors.white:Colors.black)),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(8))),
+                    child: Text("Chat Room",
+                        style: TextStyle(
+                            color: _index == 2 ? Colors.white : Colors.black)),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() => _index = 3);
+                    context.read<LocateProvider>().fetchNearbyUsers(userId);
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 6),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                        color: _index == 3
+                            ? const Color.fromARGB(255, 87, 167, 233)
+                            : Colors.transparent,
+                        border: Border.all(width: 1),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(8))),
+                    child: Text("Near",
+                        style: TextStyle(
+                            color: _index == 3 ? Colors.white : Colors.black)),
                   ),
                 ),
               ),
@@ -104,11 +152,10 @@ class _Check extends State<Check> {
   }
 }
 
-
 class _ContactPage extends StatelessWidget {
   final List<UserSearch> userlist;
   final int userId;
-  const _ContactPage({required this.userId ,required this.userlist});
+  const _ContactPage({required this.userId, required this.userlist});
 
   @override
   Widget build(BuildContext context) {
@@ -119,12 +166,17 @@ class _ContactPage extends StatelessWidget {
           final user = userlist[index];
           return ListTile(
             onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context)=> Account(friendId: user.id??0)));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => Account(friendId: user.id ?? 0)));
             },
             leading: CircleAvatar(
-              backgroundImage: (user.avatarUrl != null && user.avatarUrl!.isNotEmpty)
-                  ? NetworkImage(user.avatarUrl!)
-                  : const AssetImage('assets/image/avatar_default.png') as ImageProvider,
+              backgroundImage:
+                  (user.avatarUrl != null && user.avatarUrl!.isNotEmpty)
+                      ? NetworkImage(user.avatarUrl!)
+                      : const AssetImage('assets/image/avatar_default.png')
+                          as ImageProvider,
             ),
             title: Text(user.displayname ?? "Không tên"),
           );
@@ -147,7 +199,8 @@ class _MessagePage extends StatelessWidget {
           final mess = messlist[index];
           return ListTile(
             title: Text(mess.content ?? ""),
-            subtitle: Text("Nhóm: ${mess.groupname ?? "Không rõ"} - Người gửi: ${mess.sendername ?? "Ẩn danh"}"),
+            subtitle: Text(
+                "Nhóm: ${mess.groupname ?? "Không rõ"} - Người gửi: ${mess.sendername ?? "Ẩn danh"}"),
           );
         },
       ),
@@ -168,11 +221,45 @@ class _RoomPage extends StatelessWidget {
           final room = roomlist[index];
           return ListTile(
             leading: CircleAvatar(
-              backgroundImage: (room.avatarUrl != null && room.avatarUrl!.isNotEmpty)
-                  ? NetworkImage(room.avatarUrl!)
-                  : const AssetImage('assets/image/avatar_default.png') as ImageProvider,
+              backgroundImage:
+                  (room.avatarUrl != null && room.avatarUrl!.isNotEmpty)
+                      ? NetworkImage(room.avatarUrl!)
+                      : const AssetImage('assets/image/avatar_default.png')
+                          as ImageProvider,
             ),
             title: Text(room.groupname ?? "Không rõ tên nhóm"),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _UserNearPage extends StatelessWidget {
+  final List<UserNear> listuser;
+  const _UserNearPage({required this.listuser});
+
+  @override
+  Widget build(BuildContext context) {
+    final provider=context.watch<LocateProvider>();
+    if (provider.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    return Center(
+      child: ListView.builder(
+        itemCount: listuser.length,
+        itemBuilder: (context, index) {
+          final users = listuser[index];
+          return ListTile(
+            leading: CircleAvatar(
+              backgroundImage: (users.user.avatarUrl != null &&
+                      users.user.avatarUrl!.isNotEmpty)
+                  ? NetworkImage(users.user.avatarUrl!)
+                  : const AssetImage('assets/image/avatar_default.png')
+                      as ImageProvider,
+            ),
+            title: Text(users.user.name ?? "Không rõ tên người dùng"),
+            trailing: Text('Cách bạn ${users.distance.toStringAsFixed(2)} km'),
           );
         },
       ),

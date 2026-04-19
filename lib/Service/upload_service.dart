@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:rela/Service/ip.dart';
 import 'package:http/http.dart' as http;
 
@@ -19,7 +20,7 @@ class UploadService {
     final response = await request.send();
     final body = await response.stream.bytesToString();
     final json = jsonDecode(body);
-    print(json['url']);
+    debugPrint(json['url']);
     return json['url'];
   }
 }

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/widgets.dart';
 import 'package:rela/Service/ip.dart';
 import 'package:rela/model/chatroomdto.dart';
 import 'package:http/http.dart' as http;
@@ -25,7 +26,7 @@ class ChatroomService {
     if (respon.statusCode==200)
     {
       final data=jsonDecode(utf8.decode(respon.bodyBytes));
-      print("Member IDs: $data");
+      debugPrint("Member IDs: $data");
       return (data as List).map((e) => e as int).toList();
     }
     else 
@@ -40,7 +41,7 @@ class ChatroomService {
     if (respon.statusCode==200)
     {
       final data=jsonDecode(utf8.decode(respon.bodyBytes));
-      print(data);
+      debugPrint(data.toString());
       return RoomDTO.fromJson(data);
     }
     else 
@@ -60,6 +61,19 @@ class ChatroomService {
     else 
     {
       throw Exception("Không thể lấy phòng chat");
+    } 
+  }
+  Future<void> addRoom(int roomId,int userId) async
+  {
+    final url=Uri.parse('$baseUrl/room/add/$roomId/$userId');
+    final respon=await http.post(url);
+    if (respon.statusCode==200)
+    {
+      debugPrint("Thêm thành viên thành công");
+    }
+    else 
+    {
+      throw Exception("Không thể thêm thành viên");
     } 
   }
 }

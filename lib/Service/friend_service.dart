@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:rela/Service/ip.dart';
 import 'package:rela/model/friend.dart';
 import 'package:http/http.dart' as http;
@@ -31,7 +32,7 @@ class FriendService {
     );
     if (respon.statusCode==200)
     {
-      print("Đã gửi lời mời kết bạn");
+      debugPrint("Đã gửi lời mời kết bạn");
     }
     else 
     {
@@ -51,7 +52,7 @@ class FriendService {
     );
     if (respon.statusCode==200)
     {
-      print("Đã gửi lời mời kết bạn");
+      debugPrint("Đã gửi lời mời kết bạn");
     }
     else 
     {
@@ -71,7 +72,7 @@ class FriendService {
     );
     if (respon.statusCode==200)
     {
-      print("Đã gửi lời mời kết bạn");
+      debugPrint("Đã gửi lời mời kết bạn");
     }
     else 
     {

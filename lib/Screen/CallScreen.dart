@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rela/provider/call_provider.dart';
-import 'IncommingCall.dart';
-import 'InCallUI.dart';
+import 'incommingCall.dart';
+import 'inCallUI.dart';
 
 class CallScreen extends StatelessWidget {
   const CallScreen({super.key});
@@ -12,7 +12,7 @@ class CallScreen extends StatelessWidget {
     final call = context.watch<CallProvider>();
 
     if (call.haveCall && !call.isInCall) {
-      return InCommingCall();
+      return const InCommingCall();
     }
 
     if (call.isInCall) {

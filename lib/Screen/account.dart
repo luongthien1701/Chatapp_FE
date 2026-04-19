@@ -41,6 +41,8 @@ class _AccountState extends State<Account> {
   @override
   void initState() {
     super.initState();
+    final newsfeedProvider = context.read<NewsfeedProvider>();
+    final accountProvider = context.read<AccountProvider>();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       userId = context.read<UserProvider>().userId;
       name = context.read<UserProvider>().getDisplayname;
@@ -49,11 +51,11 @@ class _AccountState extends State<Account> {
             widget.friendId,
           );
 
-      await context.read<NewsfeedProvider>().fetchNewsfeedByUserId(
-            widget.friendId == 0 ? userId : widget.friendId,
-          );
+      await newsfeedProvider.fetchNewsfeedByUserId(
+        widget.friendId == 0 ? userId : widget.friendId,
+      );
 
-      final profile = context.read<AccountProvider>().profile;
+      final profile = accountProvider.profile;
       _displayNameCtrl.text = profile?.displayName ?? "";
       _emailCtrl.text = profile?.email ?? "";
       _phoneCtrl.text = profile?.phone ?? "";
@@ -138,6 +140,7 @@ class _AccountState extends State<Account> {
   // ================= PROFILE HEADER =================
 
   Widget _buildProfileHeader(AccountProvider provider) {
+    final userProvider = context.read<UserProvider>();
     return Column(
       children: [
         const SizedBox(height: 20),
@@ -146,7 +149,7 @@ class _AccountState extends State<Account> {
           onTap: provider.isMe
               ? () async {
                   await _pickImage();
-                  await context.read<UserProvider>().updateAvatar(_image!);
+                  await userProvider.updateAvatar(_image!);
                 }
               : null,
           child: CircleAvatar(
@@ -211,38 +214,24 @@ class _AccountState extends State<Account> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            provider.status != "ACCEPTED"
-                ? ElevatedButton(
-                    onPressed: () {
-                      provider.addFriend(userId, friendId);
-                    },
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        foregroundColor: Colors.white),
-                    child: const Text("Add Friend"))
-                : ElevatedButton(
-                    onPressed: () {
-                      provider.deleteFriend(userId, friendId);
-                    },
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        foregroundColor: Colors.white),
-                    child: const Text("Remove Friend")),
+            _buildFriendButton(provider, userId, friendId),
             const SizedBox(width: 10),
             ElevatedButton(
               onPressed: () async {
+                final navigator = Navigator.of(context);
                 int roomId = await context
                     .read<AccountProvider>()
                     .findRoom(userId, friendId);
-                Navigator.push(
-                  context,
+                navigator.push(
                   MaterialPageRoute(
                     builder: (_) => Conversation(convervationid: roomId),
                   ),
                 );
               },
               style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue, foregroundColor: Colors.white),
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+              ),
               child: const Text("Message"),
             ),
           ],
@@ -255,6 +244,57 @@ class _AccountState extends State<Account> {
         const Divider(thickness: 2),
       ],
     );
+  }
+
+  Widget _buildFriendButton(
+      AccountProvider provider, int userId, int friendId) {
+    switch (provider.status) {
+      case "NONE":
+        return ElevatedButton(
+          onPressed: () {
+            provider.addFriend(userId, friendId);
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blue,
+            foregroundColor: Colors.white,
+          ),
+          child: const Text("Add Friend"),
+        );
+
+      case "PENDING":
+        return ElevatedButton(
+          onPressed: null, // disable
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.grey,
+          ),
+          child: const Text("Pending"),
+        );
+
+      case "ACCEPTED":
+        return ElevatedButton(
+          onPressed: () {
+            provider.deleteFriend(userId, friendId);
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.red,
+            foregroundColor: Colors.white,
+          ),
+          child: const Text("Remove Friend"),
+        );
+      case "RECEIVED":
+        return ElevatedButton(
+          onPressed: () {
+            provider.acceptFriend(userId, friendId);
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.green,
+            foregroundColor: Colors.white,
+          ),
+          child: const Text("Accept Friend"),
+        );
+      default:
+        return const SizedBox();
+    }
   }
 
   Widget _actionButton(String title, AccountAction action) {
@@ -291,7 +331,15 @@ class _AccountState extends State<Account> {
         _textField("Số điện thoại", _phoneCtrl),
         ElevatedButton(
           onPressed: () {
-            // TODO: gọi API update info
+            context.read<UserProvider>().updateProfile(
+                  _displayNameCtrl.text,
+                  _emailCtrl.text,
+                  _phoneCtrl.text,
+                );
+            context.read<AccountProvider>().loadProfile(
+                  userId,
+                  widget.friendId,
+                );    
           },
           child: const Text("Lưu thay đổi"),
         ),
@@ -307,9 +355,7 @@ class _AccountState extends State<Account> {
         _textField("Mật khẩu mới", _newPasswordCtrl, obscure: true),
         _textField("Nhập lại mật khẩu", _rePasswordCtrl, obscure: true),
         ElevatedButton(
-          onPressed: () {
-            // TODO: gọi API đổi mật khẩu
-          },
+          onPressed: () {},
           child: const Text("Đổi mật khẩu"),
         ),
       ],
@@ -328,7 +374,10 @@ class _AccountState extends State<Account> {
         obscureText: obscure,
         decoration: InputDecoration(
           labelText: label,
+          labelStyle: const TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          filled: true,
+          fillColor: Colors.white
         ),
       ),
     );
@@ -357,7 +406,7 @@ class _AccountState extends State<Account> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      post.senderId.name,
+                      post.senderId.name ?? "",
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     Text(
@@ -366,7 +415,7 @@ class _AccountState extends State<Account> {
                     ),
                   ],
                 ),
-                Spacer(),
+                const Spacer(),
                 Visibility(
                   visible: widget.friendId == 0,
                   child: IconButton(
@@ -396,7 +445,7 @@ class _AccountState extends State<Account> {
                         ),
                       );
                     },
-                    icon: Icon(Icons.delete),
+                    icon: const Icon(Icons.delete),
                   ),
                 ),
               ],
@@ -491,7 +540,7 @@ class _AccountState extends State<Account> {
                                 "assets/image/avatar_default.png",
                               ),
                             ),
-                            title: Text(comment.sender.name),
+                            title: Text(comment.sender.name ?? "Ẩn danh"),
                             subtitle: Text(comment.content),
                           );
                         },
@@ -506,7 +555,7 @@ class _AccountState extends State<Account> {
                       Expanded(
                         child: TextField(
                           controller: commentController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             hintText: "Write a comment...",
                           ),
                         ),

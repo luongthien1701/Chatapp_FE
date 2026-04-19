@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:rela/Service/ip.dart';
 import 'package:rela/model/comment.dart';
 import 'package:rela/model/message.dart';
@@ -12,7 +13,7 @@ class CommentService {
     if (response.statusCode==200)
     {
       final data=jsonDecode(utf8.decode(response.bodyBytes)) as List;
-      print(data);
+      debugPrint(data.toString());
       return data.map(  (e) => CommentDTO.fromJson(e)).toList();
     }
     else
@@ -36,7 +37,7 @@ class CommentService {
     );
     if (response.statusCode==200)
     {
-      print("Thêm bình luận thành công");
+      debugPrint("Thêm bình luận thành công");
       final data=jsonDecode(utf8.decode(response.bodyBytes));
       return data['id'];      
     }

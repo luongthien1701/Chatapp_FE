@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:rela/Service/socket_service.dart';
+import 'package:rela/model/message.dart';
+import 'package:rela/model/notification.dart';
 import 'package:rela/model/userdto.dart';
 import 'package:rela/Service/profile_service.dart';
 import 'package:rela/Service/friend_service.dart';
@@ -37,12 +40,41 @@ class AccountProvider extends ChangeNotifier {
   Future<void> addFriend(int userId, int friendId) async {
     await _friendService.addFriend(userId, friendId);
     status = "PENDING";
+    NotiDTO noti = NotiDTO(
+      title: "",
+      status: false,
+      createdAt: 0,
+      senderId: SenderInfo(
+        id: userId,
+        name: "",
+        avatarUrl: "",
+      ),
+      receiverId: friendId,
+      type: "add_friend",
+    );
+    final payload = {"event": "notification", "data": noti.toJson()};
+    SocketService().sendMessage(payload);
     notifyListeners();
   }
 
   Future<void> acceptFriend(int userId, int friendId) async {
     await _friendService.acceptFriend(userId, friendId);
     status = "ACCEPTED";
+    NotiDTO noti = NotiDTO(
+      title: "",
+      status: false,
+      createdAt: 0,
+      senderId: SenderInfo(
+        id: userId,
+        name: "",
+        avatarUrl: "",
+      ),
+      receiverId: friendId,
+      type: "accept_friend",
+    );
+    final payload = {"event": "notification", "data": noti.toJson()};
+
+    SocketService().sendMessage(payload);
     notifyListeners();
   }
 

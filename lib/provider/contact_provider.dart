@@ -16,7 +16,7 @@ class FriendProvider extends ChangeNotifier {
     try {
       _list = await _friendService.getChatrooms(userId);
     } catch (e) {
-      print("❌ Không thể lấy danh sách bạn bè: $e");
+      debugPrint("❌ Không thể lấy danh sách bạn bè: $e");
     } finally {
       _isLoading = false;
       notifyListeners();

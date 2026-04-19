@@ -16,7 +16,7 @@ class NewsfeedProvider extends ChangeNotifier {
       newsfeed = await newsfeedService.getPost(userId);
       notifyListeners();
     } catch (e) {
-      print("❌ Lỗi khi tải newsfeed: $e");
+      debugPrint("❌ Lỗi khi tải newsfeed: $e");
     }
   }
   Future<void> fetchNewsfeedByUserId(int userId) async {
@@ -24,7 +24,7 @@ class NewsfeedProvider extends ChangeNotifier {
       newsfeed = await newsfeedService.getPostByUserId(userId);
       notifyListeners();
     } catch (e) {
-      print("❌ Lỗi khi tải newsfeed theo userId: $e");
+      debugPrint("❌ Lỗi khi tải newsfeed theo userId: $e");
     }
   }
   void updatelike(int postId) 
@@ -47,7 +47,7 @@ class NewsfeedProvider extends ChangeNotifier {
     try {
       await newsfeedService.likePost(postId, userId);
     } catch (e) {
-      print("❌ Lỗi khi like bài viết: $e");
+      debugPrint("❌ Lỗi khi like bài viết: $e");
     }
   }
   Future<void> unlikePost(int postId, int userId) async
@@ -55,7 +55,7 @@ class NewsfeedProvider extends ChangeNotifier {
     try {
       await newsfeedService.unlikePost(postId, userId);
     } catch (e) {
-      print("❌ Lỗi khi unlike bài viết: $e");
+      debugPrint("❌ Lỗi khi unlike bài viết: $e");
     }
   }
   void increaseComment(int postId) 
@@ -86,7 +86,7 @@ class NewsfeedProvider extends ChangeNotifier {
         await newsfeedService.addPostImage(PostImage(id: 0, postId: postId, imageUrl: url));
       }
     } catch (e) {
-      print("❌ Lỗi khi tải ảnh lên bài viết: $e");
+      debugPrint("❌ Lỗi khi tải ảnh lên bài viết: $e");
     }
   }
   Future<int> createPost(SenderInfo senderInfo, String content) async
@@ -95,7 +95,7 @@ class NewsfeedProvider extends ChangeNotifier {
       int id=await newsfeedService.createPost(senderInfo, content);
       return id;
     } catch (e) {
-      print("❌ Lỗi khi tạo bài viết: $e");
+      debugPrint("❌ Lỗi khi tạo bài viết: $e");
       return -1;
     }
   }
@@ -106,7 +106,7 @@ class NewsfeedProvider extends ChangeNotifier {
       newsfeed.removeWhere((post) => post.id == postId);
       notifyListeners();
     } catch (e) {
-      print("❌ Lỗi khi xóa bài viết: $e");
+      debugPrint("❌ Lỗi khi xóa bài viết: $e");
     }
   }
 }

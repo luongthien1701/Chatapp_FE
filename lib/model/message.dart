@@ -1,8 +1,8 @@
-enum MessageType { TEXT, IMAGE, VIDEO }
+enum MessageType { text, image, video }
 
 class SenderInfo {
   final int id;
-  final String name;
+  final String? name;
   final String? avatarUrl;
 
   SenderInfo({
@@ -55,7 +55,7 @@ class MessageDTO {
       id: json['id'],
       content: json['content'],
       fileUrl: json['fileUrl'],
-      type: json['type'],
+      type: json['type'].toLowerCase(),
       status: json['status'],
       sentAt: json['sentAt'],
       editedAt: json['editedAt'],
@@ -86,7 +86,7 @@ class MessageSend {
       'senderId': senderId,
       'content': content,
       'fileUrl': fileUrl,
-      'type': type.toString().split('.').last,
+      'type': type.toString().split('.').last.toUpperCase(),
     };
   }
 }

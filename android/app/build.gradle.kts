@@ -44,6 +44,7 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+    
 }
 
 flutter {

@@ -92,10 +92,10 @@ class _LoginPageState extends State<LoginPage> {
                     if (username.text.isEmpty||password.text.isEmpty)
                     {
                       showDialog(context: context, builder: (context)=>AlertDialog(
-                        title: Text("Thông báo"),
-                        content: Text("Vui lòng nhập đầy đủ thông tin"),
+                        title: const Text("Thông báo"),
+                        content: const Text("Vui lòng nhập đầy đủ thông tin"),
                         actions: [
-                          ElevatedButton(onPressed: () {Navigator.pop(context);}, child: Text("OK")),
+                          ElevatedButton(onPressed: () {Navigator.pop(context);}, child: const Text("OK")),
                         ], 
                       )
                       );
@@ -103,14 +103,16 @@ class _LoginPageState extends State<LoginPage> {
                     try{
                     Loginrequest userlogin=Loginrequest(username: username.text, password: password.text);
                     SenderInfo user= await auth.login(userlogin);
-                    provider.setUser(user.id, user.name, user.avatarUrl ?? '');
+                    if (!currentcontext.mounted) return;
+                    final navigator=Navigator.of(currentcontext);
+                    provider.setUser(user.id, user.name??"Ẩn danh", user.avatarUrl ?? '');
                     if (!mounted) return;
-                    Navigator.push(currentcontext, MaterialPageRoute(builder: (context)=> Hub()));
+                    navigator.push(MaterialPageRoute(builder: (context)=> const Hub()));
                     }
                     catch(e)
                     {
-                      print(e.toString());
-                      print("login fail");
+                      debugPrint(e.toString());
+                      debugPrint("login fail");
                     }
                   },
                   child: const Text("Login"),

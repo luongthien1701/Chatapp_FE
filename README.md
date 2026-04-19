@@ -1,16 +1,24 @@
-# rela
 
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Features
+Authentication
+    Đăng ký / Đăng nhập tài khoản
+Messaging
+    Xem và hiển thị tin nhắn theo cuộc trò chuyện
+    Phân biệt tin nhắn của mình và người khác
+Friends & Chatrooms
+    Danh sách bạn bè / phòng chat
+    Gửi, chấp nhận và xoá lời mời kết bạn
+Feed
+    Đăng bài,thêm ảnh,trạng thái
+    Xem được like,comment theo thời gian thực
+    Xem bài viết của bạn bè,xóa bài viết của bản thân    
+Profile
+    Xem và cập nhật thông tin cá nhân
+    Cập nhật avatar
+Account
+    Đăng xuất
+    Điều hướng giữa các màn hình
+Tech Stack
+    Flutter (Dart)
+    Provider (State Management)
+    REST API (HTTP)

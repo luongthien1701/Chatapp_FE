@@ -28,6 +28,7 @@ class ConversationProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
   Future<void> loadMemberIds(int roomId) async {
     try {
       memberIds = await _chatroomService.getMemberIds(roomId);
@@ -46,14 +47,11 @@ class ConversationProvider with ChangeNotifier {
     }
   }
 
-  Future<String> upImageMessages(File img,int roomId) async
-  {
-    try{
-      String url=await _uploadService.uploadimage(img,"chat", roomId);
+  Future<String> upImageMessages(File img, int roomId) async {
+    try {
+      String url = await _uploadService.uploadimage(img, "chat", roomId);
       return url;
-    } 
-    catch (e) 
-    {
+    } catch (e) {
       debugPrint("Đã xảy ra lỗi khi gửi tin nhắn ảnh");
     }
     return "";
@@ -68,53 +66,61 @@ class ConversationProvider with ChangeNotifier {
   }
 
   Future<void> listenMessages(
-  int userId, {
-  VoidCallback? onNewMessage,
-}) {
-  SocketService().messages.listen((data) {
-    final msg = jsonDecode(data);
+    int userId, {
+    VoidCallback? onNewMessage,
+  }) {
+    SocketService().messages.listen((data) {
+      final msg = jsonDecode(data);
 
-    if (msg["event"] == "message") {
-      final payload = msg["data"];
+      if (msg["event"] == "message") {
+        final payload = msg["data"];
+        final messageId = int.parse(payload['id'].toString());
+        if (messages.any((m) => m.id == messageId)) return;
+        messages.add(MessageDTO(
+          id: int.parse(payload['id'].toString()),
+          content: payload['content'],
+          sender: SenderInfo(
+            id: int.parse(payload['sender']['id'].toString()),
+            name: payload['sender']['name'],
+            avatarUrl: payload['sender']['avatarUrl'],
+          ),
+          isMe: payload['sender']['id'] == userId,
+          fileUrl: payload['fileUrl'],
+          type: payload['type'],
+          status: payload['status'],
+          sentAt: payload['sentAt'],
+          editedAt: payload['editedAt'],
+        ));
 
-      messages.add(MessageDTO(
-        id: int.parse(payload['id'].toString()),
-        content: payload['content'],
-        sender: SenderInfo(
-          id: int.parse(payload['sender']['id'].toString()),
-          name: payload['sender']['name'],
-          avatarUrl: payload['sender']['avatarUrl'],
-        ),
-        isMe: payload['sender']['id'] == userId,
-        fileUrl: payload['fileUrl'],
-        type: payload['type'],
-        status: payload['status'],
-        sentAt: payload['sentAt'],
-        editedAt: payload['editedAt'],
-      ));
+        notifyListeners();
 
-      notifyListeners();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          onNewMessage?.call();
+        });
+      }
+    });
 
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        onNewMessage?.call();
-      });
-    }
-  });
+    return Future.value();
+  }
 
-  return Future.value();
-}
   void sendMessage(MessageSend msg) {
     final payload = {"event": "message", "data": msg.toJson()};
     SocketService().sendMessage(payload);
   }
 
   void leaveRoom(int userId, int roomId) {
-    print("leave in provider");
     final payload = {
       "event": "leave_room",
       "data": {"userId": userId, "roomId": roomId}
     };
     SocketService().sendMessage(payload);
   }
-  
+  void addUserInRoom(int roomId,int userId)
+  {
+    isLoading=true;
+    notifyListeners(); 
+    _chatroomService.addRoom(roomId, userId);
+    isLoading=false;
+    notifyListeners();
+  }
 }

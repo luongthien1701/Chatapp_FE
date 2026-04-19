@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class ThemeProvider extends ChangeNotifier {
-  Color _currentTheme = Color.fromARGB(255, 27, 123, 202);
-  Color _lightTheme=const Color.fromARGB(255, 205, 210, 238);
+  Color _currentTheme = const Color.fromARGB(255, 27, 123, 202);
+  final Color _lightTheme=const Color.fromARGB(255, 205, 210, 238);
   bool isDarkMode = false;
   Color get currentTheme => _currentTheme;
   Color get lightTheme => _lightTheme;

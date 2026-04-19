@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:rela/Screen/banner.dart';
 import 'package:rela/Screen/newfeed.dart';
 import 'package:rela/Service/notification_service.dart';
 import 'package:rela/Service/socket_service.dart';
@@ -35,6 +36,8 @@ class _HubState extends State<Hub> {
   void initState() {
     super.initState();
     userId = context.read<UserProvider>().userId;
+    final notiProvide=context.read<NotificationProvider>();
+    final callProvider=context.read<CallProvider>();
     _initFCM();
     final socket = SocketService();
     socket.connect(userId);
@@ -44,13 +47,14 @@ class _HubState extends State<Hub> {
 
       switch (msg['event']) {
         case 'notification':
-          context.read<NotificationProvider>().onReceive(msg);
+          notiProvide.onReceive(msg);
+          GlobalBannerService.show("He he", avatar: "https://www.pngall.com/wp-content/uploads/5/User-Profile-PNG-High-Quality-Image.png");
           break;
 
         case 'call_comming':
-          context.read<CallProvider>().onReceived(msg);
+          callProvider.onReceived(msg);
           break;
-
+ 
         // sau này thêm:
         // case 'chat_message':
         //   context.read<MessageProvider>().onReceive(msg);
@@ -95,7 +99,6 @@ class _HubState extends State<Hub> {
                       final n = provider.notifications[index];
                       return ListTile(
                         leading: const Icon(Icons.notifications),
-                        title: Text(n.senderId.name),
                         subtitle: Text(n.title),
                         onTap: () {
                           Navigator.push(

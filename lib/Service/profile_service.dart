@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:rela/Service/ip.dart';
 import 'package:rela/model/message.dart';
 import 'package:rela/model/userdto.dart';
@@ -40,7 +41,7 @@ class ProfileService {
     if (response.statusCode==200)
     {
       final data=jsonDecode(response.body);
-      print(data['check']);
+      debugPrint(data['check']);
       return data['status'];
     }
     else 
@@ -91,4 +92,6 @@ class ProfileService {
       throw Exception("Cập nhật profile thất bại");
     }
   }
+
+  
 }

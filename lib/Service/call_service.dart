@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:rela/Service/ip.dart';
 
@@ -32,7 +33,7 @@ class CallService {
     engine.registerEventHandler(
       RtcEngineEventHandler(
         onJoinChannelSuccess: (connection, elapsed) {
-          print(
+          debugPrint(
               '✅ Joined channel: ${connection.channelId}, uid=${connection.localUid}');
         },
         onUserJoined: (connection, uid, elapsed) {
@@ -65,19 +66,15 @@ class CallService {
   }
 
   Future<void> joinChannel(String token, String channelId, int uid) async {
-    // 🔥 SỬA LẠI options NHƯ SAU:
     await engine.joinChannel(
       token: token,
       channelId: channelId,
       uid: uid,
       options: const ChannelMediaOptions(
-        // Bắt buộc set Communication (1) ở đây
         channelProfile: ChannelProfileType.channelProfileCommunication,
 
-        // Role phải là Broadcaster
         clientRoleType: ClientRoleType.clientRoleBroadcaster,
 
-        // Tự động subscribe audio/video
         autoSubscribeAudio: true,
         autoSubscribeVideo: true,
         publishCameraTrack: true,

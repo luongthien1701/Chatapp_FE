@@ -19,34 +19,34 @@ class SearchProvider extends ChangeNotifier {
     _loading = true;
     notifyListeners();
     try {
-      List<SearchDTO> data = await _searchService.getMessages(userId, like);
+      List<SearchDTO> datas = await _searchService.getMessages(userId, like);
       _userlist.clear();
       _messlist.clear();
       _roomlist.clear();
 
-      for (var _data in data) {
-        switch (_data.type) {
+      for (var data in datas) {
+        switch (data.type) {
           case "user":
             _userlist.add(UserSearch(
-              id: _data.id,
-              avatarUrl: _data.avatarUrl,
-              displayname: _data.name,
+              id: data.id,
+              avatarUrl: data.avatarUrl,
+              displayname: data.name,
             ));
             break;
           case "messager":
             _messlist.add(MessSearch(
-              messid: _data.id,
-              content: _data.content,
-              groupid: _data.groupId,
-              groupname: _data.groupName,
-              sendername: _data.name,
+              messid: data.id,
+              content: data.content,
+              groupid: data.groupId,
+              groupname: data.groupName,
+              sendername: data.name,
             ));
             break;
           case "room":
             _roomlist.add(RoomSearch(
-              groupid: _data.groupId,
-              avatarUrl: _data.avatarUrl,
-              groupname: _data.groupName,
+              groupid: data.groupId,
+              avatarUrl: data.avatarUrl,
+              groupname: data.groupName,
             ));
             break;
         }

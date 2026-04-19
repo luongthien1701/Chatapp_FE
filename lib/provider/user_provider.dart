@@ -37,8 +37,8 @@ class UserProvider extends ChangeNotifier {
   }
   Future<void> updateProfile(String name,String email,String phone) async
   {
-    
-    notifyListeners();
+    await profileService.updateProfile(_userId, name, email, phone);
+    _displayname=name;
   }
   Future<SenderInfo> getProfile(int userId) async
   {

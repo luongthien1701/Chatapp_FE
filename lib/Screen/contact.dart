@@ -18,10 +18,11 @@ class _Contact extends State<Contact> {
   @override
   void initState() {
     super.initState();
-    userId=context.read<UserProvider>().userId;
-    color=context.read<ThemeProvider>().lightTheme;
-    Future.microtask(() =>
-        context.read<FriendProvider>().fetchListFriend(userId));
+    userId = context.read<UserProvider>().userId;
+    color = context.read<ThemeProvider>().lightTheme;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<FriendProvider>().fetchListFriend(userId);
+    });
   }
 
   @override
@@ -44,11 +45,14 @@ class _Contact extends State<Contact> {
                     Navigator.push(
                       context,
                       PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) => Account(
+                        pageBuilder: (context, animation, secondaryAnimation) =>
+                            Account(
                           friendId: list[index].friendId,
                         ),
                         transitionDuration: const Duration(milliseconds: 500),
-                        transitionsBuilder: (context, animation, secondaryAnimation, child) => FadeTransition(
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) =>
+                                FadeTransition(
                           opacity: animation,
                           child: child,
                         ),

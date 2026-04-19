@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:rela/Service/ip.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 class SocketService {
   static final SocketService _instance = SocketService._internal();
@@ -21,10 +23,10 @@ class SocketService {
 
     _userId = userId;
     isLogout=false;
-    print('🔌 Connecting as user $userId');
-
+    debugPrint('🔌 Connecting as user $userId');
+    String ip=Ip().ip;
     _channel = WebSocketChannel.connect(
-      Uri.parse('ws://192.168.195.183:8080/ws/chat?userId=$userId'),
+      Uri.parse('ws://$ip:8080/ws/chat?userId=$userId'),
     );
 
     _channel!.stream.listen(
@@ -34,11 +36,11 @@ class SocketService {
         _controller.add(data);
       },
       onError: (e) {
-        print('⚠️ Socket error: $e');
+        debugPrint('⚠️ Socket error: $e');
         _handleReconnect();
       },
       onDone: () {
-        print('🔌 Socket closed');
+        debugPrint('🔌 Socket closed');
         _handleReconnect();
       },
       cancelOnError: true,
@@ -62,7 +64,7 @@ class SocketService {
     if (_isConnected) {
       _channel!.sink.add(jsonEncode(data));
     } else {
-      print('⚠️ Socket closed, cannot send');
+      debugPrint('⚠️ Socket closed, cannot send');
     }
   }
 

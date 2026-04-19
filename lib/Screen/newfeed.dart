@@ -16,12 +16,13 @@ class Newfeed extends StatefulWidget {
   State<Newfeed> createState() => _NewfeedState();
 }
 
-class _NewfeedState extends State<Newfeed> {
+class _NewfeedState extends State<Newfeed> with SingleTickerProviderStateMixin {
   List<bool> isLike = [];
   List<Newfeed> posts = [];
   late final int userId;
   late String name = '';
   late Color color;
+  AnimationController? _animationController;
   @override
   void initState() {
     super.initState();
@@ -36,6 +37,16 @@ class _NewfeedState extends State<Newfeed> {
         isLike = List.generate(provider.newsfeed.length, (_) => false);
       });
     });
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController?.dispose();
+    super.dispose();
   }
 
   String timeago(int milisec) {
@@ -135,7 +146,7 @@ class _NewfeedState extends State<Newfeed> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      post.senderId.name,
+                                      post.senderId.name ?? "Ẩn danh",
                                       style: const TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
@@ -190,35 +201,48 @@ class _NewfeedState extends State<Newfeed> {
 
                             Row(
                               children: [
-                                IconButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      provider.updatelike(post.id);
-                                      if (post.isFavorite) {
-                                        provider.likePost(post.id, userId);
-                                        NotiDTO notification = NotiDTO(
-                                            title: "",
-                                            status: false,
-                                            createdAt: 0,
-                                            senderId: SenderInfo(
-                                                id: userId, name: name),
-                                            receiverId: post.id,
-                                            type: "like_post");
-                                        noti.sendNotification(notification);
-                                      } else {
-                                        provider.unlikePost(post.id, userId);
-                                      }
-                                    });
-                                  },
-                                  icon: Icon(
-                                    post.isFavorite
-                                        ? Icons.favorite
-                                        : Icons.favorite_border,
-                                    color: post.isFavorite
-                                        ? Colors.red
-                                        : Colors.black,
-                                  ),
-                                ),
+                                TweenAnimationBuilder<double>(
+                                    key: ValueKey(post.isFavorite),
+                                    tween: Tween<double>(
+                                        begin: 30.0,
+                                        end: post.isFavorite ? 40.0 : 30.0),
+                                    duration: const Duration(milliseconds: 500),
+                                    curve: Curves.easeOutBack,
+                                    builder: (context, double size, _) {
+                                      return IconButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            provider.updatelike(post.id);
+                                            if (post.isFavorite) {
+                                              provider.likePost(
+                                                  post.id, userId);
+                                              NotiDTO notification = NotiDTO(
+                                                  title: "",
+                                                  status: false,
+                                                  createdAt: 0,
+                                                  senderId: SenderInfo(
+                                                      id: userId, name: name),
+                                                  receiverId: post.id,
+                                                  type: "like_post");
+                                              noti.sendNotification(
+                                                  notification);
+                                            } else {
+                                              provider.unlikePost(
+                                                  post.id, userId);
+                                            }
+                                          });
+                                        },
+                                        icon: Icon(
+                                          post.isFavorite
+                                              ? Icons.favorite
+                                              : Icons.favorite_border,
+                                          color: post.isFavorite
+                                              ? Colors.red
+                                              : Colors.black,
+                                          size: size,
+                                        ),
+                                      );
+                                    }),
                                 Text(post.favorite.toString()),
                                 IconButton(
                                   onPressed: () => _openCommentDialog(
@@ -286,7 +310,7 @@ class _NewfeedState extends State<Newfeed> {
                                 "assets/image/avatar_default.png",
                               ),
                             ),
-                            title: Text(comment.sender.name),
+                            title: Text(comment.sender.name ?? "Ẩn danh"),
                             subtitle: Text(comment.content),
                           );
                         },
@@ -301,7 +325,7 @@ class _NewfeedState extends State<Newfeed> {
                       Expanded(
                         child: TextField(
                           controller: commentController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             hintText: "Write a comment...",
                           ),
                         ),
@@ -354,7 +378,7 @@ class _NewfeedState extends State<Newfeed> {
           return Dialog(
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            child: Post(),
+            child: const Post(),
           );
         });
   }

@@ -1,10 +1,12 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:rela/Screen/CallScreen.dart';
+import 'package:rela/Screen/callScreen.dart';
+import 'package:rela/Screen/splash.dart';
 import 'package:rela/Service/notification_service.dart';
 import 'package:rela/provider/account_provider.dart';
 import 'package:rela/provider/call_provider.dart';
 import 'package:rela/provider/comment_provider.dart';
+import 'package:rela/provider/locate_provider.dart';
 import 'package:rela/provider/newsfeed_provider.dart';
 import 'package:rela/provider/search_provider.dart';
 import 'package:rela/provider/theme_provider.dart';
@@ -16,7 +18,6 @@ import 'package:rela/provider/notification_provider.dart';
 import 'package:rela/provider/convervasion_provider.dart'; 
 import 'package:rela/provider/contact_provider.dart'; 
 
-import 'Screen/login.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,7 +49,10 @@ void main() async {
         ChangeNotifierProvider(create:  (_) => NewsfeedProvider()),
         ChangeNotifierProvider(create:  (_) => CommentProvider()),
         ChangeNotifierProvider(create:  (_) => CallProvider()),
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create:  (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => LocateProvider()),
+        
+
       ],
       child: const MyApp(),
     ),
@@ -80,7 +84,7 @@ class MyApp extends StatelessWidget {
         );
       },
       
-      home: const LoginPage(), 
+      home: const SplashScreen(), 
     );
   }
 }

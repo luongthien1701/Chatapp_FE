@@ -14,7 +14,7 @@ class CommentProvider extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
     } catch (e) {
-      print("❌ Lỗi khi tải bình luận: $e");
+      debugPrint("❌ Lỗi khi tải bình luận: $e");
     }
   }
   Future<void> addComment(int postId, SenderInfo sender, String content) async
@@ -31,7 +31,7 @@ class CommentProvider extends ChangeNotifier {
       );
       notifyListeners();
     } catch (e) {
-      print("❌ Lỗi khi thêm bình luận: $e");
+      debugPrint("❌ Lỗi khi thêm bình luận: $e");
     }
   }
   Future<void> deleteComment(int commentId) async
@@ -39,7 +39,7 @@ class CommentProvider extends ChangeNotifier {
     try {
       await commentService.deleteComment(commentId);
     } catch (e) {
-      print("❌ Lỗi khi xóa bình luận: $e");
+      debugPrint("❌ Lỗi khi xóa bình luận: $e");
     }
   }
   Future<void> editComment(int postId, SenderInfo sender, String content) async
@@ -47,7 +47,7 @@ class CommentProvider extends ChangeNotifier {
     try {
       await commentService.editComment(postId, sender, content);
     } catch (e) {
-      print("❌ Lỗi khi sửa bình luận: $e");
+      debugPrint("❌ Lỗi khi sửa bình luận: $e");
     }
   }
 }

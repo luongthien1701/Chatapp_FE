@@ -33,7 +33,7 @@ class _Post extends State<Post> {
         await _picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
     if (pickedFile != null) {
       setState(() {
-        print(pickedFile.path);
+        debugPrint(pickedFile.path);
         images.add(File(pickedFile.path));
       });
     }
@@ -104,6 +104,7 @@ class _Post extends State<Post> {
           onPressed: () async {
             int postid= await provider.createPost(SenderInfo(id: id, name: name,avatarUrl: avatarUrl ), content.text);
             await provider.upLoadImagePost(images, postid);
+            if (!context.mounted) return;
             Navigator.pop(context);
           },
           child: const Text("Post"),

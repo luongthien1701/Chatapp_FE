@@ -126,6 +126,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   onPressed: () async {
                     SignUpRequest usersignup=SignUpRequest(username: username.text, password: password.text, email: email.text, phone: phone.text, displayname: displayname.text);
                     Apiresponse response=await auth.signup(usersignup);
+                    if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(response.message),
