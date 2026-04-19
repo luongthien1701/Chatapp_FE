@@ -35,4 +35,8 @@
 ---
 
 ## Demo
-https://github.com/luongthien1701/Chatapp_FE/blob/main/assets/demo/demo.mp4
+
+
+https://github.com/user-attachments/assets/af5873e0-a7c1-49dd-ab80-669959f5d788
+
+
